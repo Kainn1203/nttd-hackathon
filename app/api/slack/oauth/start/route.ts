@@ -12,9 +12,16 @@ export async function GET(req: Request) {
   const state = crypto.randomBytes(16).toString("hex");
 
   // (C) Slack認可URLを作成（ユーザー権限＝user_scope）
+  const userScopes = [
+    "channels:read",
+    "channels:history",
+    "chat:write",
+    "users:read",
+  ].join(",");
+
   const params = new URLSearchParams({
     client_id: process.env.SLACK_CLIENT_ID!,
-    user_scope: "channels:read channels:history chat:write", // 必要に応じて追加
+    user_scope: userScopes,
     redirect_uri: process.env.SLACK_REDIRECT_URI!, // https://.../api/slack/oauth/callback
     state,
   });

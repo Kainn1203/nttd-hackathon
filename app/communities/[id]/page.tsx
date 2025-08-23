@@ -8,18 +8,17 @@ import type { Community } from "@/types/community";
 import SlackChat from "@/components/community/SlackChat ";
 import OAuth from "@/components/community/OAuth";
 
-type PageProps = {
-  params: { id: string };
-};
-
-export default async function Community({ params }: PageProps) {
+export default async function Community(props: {
+  params: Promise<{ id: string }>;
+}) {
   const supabase = await createClient();
-  const id = Number(params.id);
-  if (!Number.isFinite(id)) notFound();
+  const { id } = await props.params;
+  const num = Number(id);
+  if (!Number.isFinite(num)) notFound();
   const { data, error } = await supabase
     .from("community")
     .select("*")
-    .eq("id", id)
+    .eq("id", num)
     .maybeSingle<Community>();
 
   if (error) {

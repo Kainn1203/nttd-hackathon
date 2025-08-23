@@ -8,16 +8,6 @@ type SlackMessage = {
   thread_ts?: string;
 };
 
-async function fetchUser(token: string, id: string) {
-  const r = await fetch("https://slack.com/api/users.info", {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-    // users.info は GET で ?user=
-    // POST でも可だが GET の方が簡単
-    // URLSearchParams を使う:
-  });
-}
-
 export async function GET(req: Request) {
   const token = getUserTokenFromCookie(req);
   if (!token) return new Response("unauthorized", { status: 401 });

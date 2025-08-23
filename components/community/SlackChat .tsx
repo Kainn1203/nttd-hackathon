@@ -1,6 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  Container,
+} from "@mui/material";
+import { SiSlack } from "react-icons/si";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 type Msg = { ts: string; text?: string; user?: string; subtype?: string };
 type Profiles = Record<string, { name: string; image: string }>;
@@ -16,6 +30,7 @@ const webUrl = TEAM_ID
   : undefined;
 
 function renderText(text = "", profiles: Profiles) {
+  // <@UXXXX> => @表示名
   return text.replace(
     /<@([A-Z0-9]+)>/g,
     (_, id) => `@${profiles[id]?.name ?? id}`
@@ -45,21 +60,26 @@ export default function SlackChat() {
   const [profiles, setProfiles] = useState<Profiles>({});
   const [me, setMe] = useState<string | undefined>();
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   async function load(cursor?: string) {
+    setLoading(true);
     const url = `/api/slack/history?channel=${CHANNEL_ID}${
       cursor ? `&cursor=${cursor}` : ""
     }`;
     const r = await fetch(url, { cache: "no-store" });
     const j = await r.json();
-    // ★ ここを追加：ts の昇順（古い→新しい）に並べ替える
+    console.log("profiles", j.users);
+
+    // 古い→新しいに並べ替え（最新を下に）
     const sorted = (j.messages ?? [])
       .slice()
       .sort((a: Msg, b: Msg) => parseFloat(a.ts) - parseFloat(b.ts));
     setMsgs(sorted);
     setProfiles(j.users ?? {});
     setMe(j.me);
+    setLoading(false);
     requestAnimationFrame(() =>
       bottomRef.current?.scrollIntoView({ behavior: "smooth" })
     );
@@ -77,127 +97,202 @@ export default function SlackChat() {
     if (!r.ok) alert("送信に失敗しました");
   }
 
-  async function join() {
-    const r = await fetch("/api/slack/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ channel: CHANNEL_ID }),
-    });
-    const j = await r.json();
-    if (j.ok) {
-      await load();
-      if (webUrl) window.open(webUrl, "_blank");
-    } else {
-      alert("参加に失敗しました: " + JSON.stringify(j));
-    }
-  }
+  // async function join() {
+  //   const r = await fetch("/api/slack/join", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ channel: CHANNEL_ID }),
+  //   });
+  //   const j = await r.json();
+  //   if (j.ok) {
+  //     await load();
+  //     if (webUrl) window.open(webUrl, "_blank");
+  //   } else {
+  //     alert("参加に失敗しました: " + JSON.stringify(j));
+  //   }
+  // }
 
   useEffect(() => {
     load();
   }, []);
 
   return (
-    <main className="p-6 space-y-3 max-w-2xl">
-      <h1 className="text-lg font-bold">Slack チャット</h1>
-
-      <div className="flex gap-2">
-        <button onClick={() => load()} className="border rounded px-3 py-1">
-          再読込
-        </button>
-        <button onClick={join} className="border rounded px-3 py-1">
-          チャンネルに参加（公開CH）
-        </button>
+    <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+      {/* ヘッダー */}
+      <Stack direction="row" alignItems="center" spacing={1} margin={2}>
+        <Typography variant="h6" fontWeight={700}>
+          Slack チャット
+        </Typography>
+        <Box flex={1} />
+        <Tooltip title="再読込">
+          <span>
+            <IconButton
+              onClick={() => load()}
+              disabled={loading}
+              size="medium"
+              color="primary"
+              className="dark:invert"
+            >
+              <RefreshIcon fontSize="medium" />
+            </IconButton>
+          </span>
+        </Tooltip>
+        {/* <Tooltip title="チャンネルに参加（公開CH）">
+          <IconButton onClick={join} size="medium" color="primary">
+            <GroupAddIcon fontSize="medium" />
+          </IconButton>
+        </Tooltip> */}
         {webUrl && (
-          <button
-            onClick={() => window.open(webUrl, "_blank")}
-            className="border rounded px-3 py-1"
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<SiSlack size={18} />}
+            onClick={() => window.open(webUrl, "_blank", "noopener,noreferrer")}
+            sx={{ textTransform: "none" }} // 全角英字をそのまま
+            className="dark:invert"
           >
-            Slackで開く（ブラウザ）
-          </button>
+            Slackで開く
+          </Button>
         )}
-      </div>
+      </Stack>
 
-      <div className="border rounded p-3 h-[70vh] overflow-auto bg-white">
+      <Paper
+        className="dark:invert"
+        elevation={0}
+        variant="outlined"
+        sx={{
+          p: 2,
+          height: "70vh",
+          overflow: "auto",
+          bgcolor: "background.paper",
+        }}
+      >
         {msgs.map((m) => {
           const uid = m.user ?? "";
           const p = profiles[uid];
-          const isMe = uid === me; // ← boolean に
+          const isMe = uid === me;
           const isSystem = !!m.subtype && m.subtype !== "thread_broadcast";
           const sent = formatSlackTs(m.ts);
 
           return (
-            <div key={m.ts} className="mb-3">
-              {/* 行：吹き出し */}
-              <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+            <Box key={m.ts} sx={{ mb: 1.5 }}>
+              {/* 吹き出し行 */}
+              <Stack
+                direction="row"
+                justifyContent={isMe ? "flex-end" : "flex-start"}
+                spacing={1}
+                className="dark:invert"
+              >
                 {!isMe && !isSystem && (
-                  <Image
-                    src={p?.image || "/favicon.ico"}
-                    alt=""
-                    width={32}
-                    height={32}
-                    sizes="32px"
-                    className="w-8 h-8 rounded-full mr-2 self-end"
+                  <Avatar
+                    src={p?.image || undefined}
+                    alt={p?.name || ""}
+                    sx={{ width: 32, height: 32, alignSelf: "flex-end" }}
                   />
                 )}
-                <div
-                  className={`max-w-[70%] rounded-2xl px-3 py-2 whitespace-pre-wrap break-words
-                    ${
-                      isSystem
-                        ? "bg-gray-50 text-gray-500 italic"
-                        : isMe
-                        ? "bg-blue-500 text-white rounded-tr-none"
-                        : "bg-gray-100 text-gray-900 rounded-tl-none"
-                    }`}
+
+                <Box
+                  sx={{
+                    maxWidth: "70%",
+                    px: 1.5,
+                    py: 1,
+                    borderRadius: 3,
+                    bgcolor: isSystem
+                      ? "grey.100"
+                      : isMe
+                      ? "primary.main"
+                      : "grey.100",
+                    color: isSystem
+                      ? "text.secondary"
+                      : isMe
+                      ? "primary.contrastText"
+                      : "text.primary",
+                    boxShadow: 0,
+                    ...(isMe
+                      ? { borderTopRightRadius: 6 }
+                      : { borderTopLeftRadius: 6 }),
+                    fontStyle: isSystem ? "italic" : "normal",
+                    wordBreak: "break-word",
+                    whiteSpace: "pre-wrap",
+                  }}
                 >
                   {!isMe && !isSystem && (
-                    <div className="text-xs opacity-70 mb-1">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mb: 0.5 }}
+                    >
                       {p?.name ?? uid}
-                    </div>
+                    </Typography>
                   )}
-                  <div>{renderText(m.text ?? "", profiles)}</div>
-                </div>
+                  <Typography variant="body2">
+                    {renderText(m.text ?? "", profiles)}
+                  </Typography>
+                </Box>
+
                 {isMe && !isSystem && (
-                  <Image
-                    src={profiles[uid]?.image || "/favicon.ico"}
-                    alt=""
-                    width={32}
-                    height={32}
-                    sizes="32px"
-                    className="w-8 h-8 rounded-full ml-2 self-end"
+                  <Avatar
+                    src={profiles[uid]?.image || undefined}
+                    alt={profiles[uid]?.name || ""}
+                    sx={{ width: 32, height: 32, alignSelf: "flex-end" }}
                   />
                 )}
-              </div>
+              </Stack>
 
-              {/* 時刻（吹き出しの下） */}
-              <div
-                className={`mt-1 text-[10px] opacity-60 ${
-                  isMe ? "text-right" : "text-left"
-                }`}
-                title={sent.full}
+              {/* 送信時刻 */}
+              <Box
+                sx={{
+                  mt: 0.5,
+                  display: "flex",
+                  justifyContent: isMe ? "flex-end" : "flex-start",
+                }}
               >
-                {sent.date} {sent.time}
-              </div>
-            </div>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ opacity: 0.7 }}
+                  title={sent.full}
+                >
+                  {sent.date} {sent.time}
+                </Typography>
+              </Box>
+            </Box>
           );
         })}
         <div ref={bottomRef} />
-      </div>
+      </Paper>
 
-      <div className="flex gap-2">
-        <input
-          className="border rounded px-3 py-2 flex-1"
+      {/* 入力欄 */}
+      <Stack
+        direction="row"
+        spacing={1}
+        marginTop={2}
+        marginBottom={2}
+        className="dark:invert"
+      >
+        <TextField
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="メッセージを入力（Enterで送信 / Shift+Enterで改行）"
-          onKeyDown={(e) =>
-            e.key === "Enter" &&
-            (e.shiftKey ? null : (e.preventDefault(), send()))
-          }
+          fullWidth
+          size="small"
+          multiline
+          minRows={1}
+          maxRows={4}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
         />
-        <button onClick={send} className="border rounded px-4 py-2">
+        <Button variant="contained" onClick={send} disableElevation>
           送信
-        </button>
-      </div>
-    </main>
+        </Button>
+      </Stack>
+
+      {/* 区切り（任意） */}
+      <Divider sx={{ my: 1 }} />
+    </Container>
   );
 }
