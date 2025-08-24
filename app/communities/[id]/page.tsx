@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPublicImageUrl } from "@/lib/supabase/image";
 import CommunityDetail from "@/components/community/CommunityDetail";
 import type { Community } from "@/types/community";
+import { Alert, AlertTitle } from "@mui/material";
 
 import SlackChat from "@/components/community/SlackChat ";
 import OAuth from "@/components/community/OAuth";
@@ -22,7 +23,12 @@ export default async function Community(props: {
     .maybeSingle<Community>();
 
   if (error) {
-    return <p>読み込み失敗： {error.message}</p>;
+    return (
+      <Alert severity="error">
+        <AlertTitle>読み込みに失敗しました</AlertTitle>
+        {error.message}
+      </Alert>
+    );
   }
   if (!data) {
     return notFound();

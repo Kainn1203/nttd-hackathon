@@ -1,4 +1,3 @@
-// components/community/OAuth.tsx
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
@@ -25,7 +24,6 @@ export default function OAuth() {
 
   return (
     <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
-      {/* ヘッダー */}
       <Stack direction="row" alignItems="center" spacing={1} margin={2}>
         <Typography variant="h6" fontWeight={700}>
           Slack チャット
@@ -54,7 +52,6 @@ export default function OAuth() {
           Slackで開く
         </Button>
       </Stack>
-      {/* SlackChat と高さ・幅感を合わせた Paper */}
       <Paper
         variant="outlined"
         elevation={0}
@@ -68,7 +65,6 @@ export default function OAuth() {
         }}
         className="dark:invert"
       >
-        {/* 中央に縦並びで配置 */}
         <Stack spacing={2} alignItems="center">
           <Typography variant="h6" fontWeight={700}>
             Slack 連携が必要です

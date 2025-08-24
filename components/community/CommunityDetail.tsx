@@ -25,7 +25,11 @@ export default function CommunityDetail({ community, imageUrl }: Props) {
 
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
-      <Card variant="outlined" sx={{ borderRadius: 3 }} className="dark:invert">
+      <Card
+        variant="outlined"
+        sx={{ borderRadius: 3, border: "none" }}
+        className="dark:invert"
+      >
         <CardHeader
           title={
             <Stack direction="row" alignItems="center" spacing={1}>
@@ -48,7 +52,7 @@ export default function CommunityDetail({ community, imageUrl }: Props) {
                     borderRadius: 2,
                     overflow: "hidden",
                     bgcolor: "background.default",
-                    border: (t) => `1px solid ${t.palette.divider}`,
+                    border: "none",
                   }}
                 >
                   {/* 比率維持でレスポンシブ */}
