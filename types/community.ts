@@ -5,4 +5,5 @@ export type Community = {
   owner_id: number | null;
   image_path: string | null;
   created_at: string | null;
+  slack_channel_id: string;
 };

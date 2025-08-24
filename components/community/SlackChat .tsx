@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Avatar,
   Box,
@@ -18,16 +18,9 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 type Msg = { ts: string; text?: string; user?: string; subtype?: string };
 type Profiles = Record<string, { name: string; image: string }>;
+type SlackChatProps = { channelId: string };
 
-const CHANNEL_ID = process.env.NEXT_PUBLIC_SLACK_CHANNEL_ID as string;
 const SUBDOMAIN = process.env.NEXT_PUBLIC_SLACK_WORKSPACE_SUBDOMAIN;
-const TEAM_ID = process.env.NEXT_PUBLIC_SLACK_TEAM_ID;
-
-const webUrl = TEAM_ID
-  ? `https://app.slack.com/client/${TEAM_ID}/${CHANNEL_ID}`
-  : SUBDOMAIN
-  ? `https://${SUBDOMAIN}.slack.com/archives/${CHANNEL_ID}`
-  : undefined;
 
 function renderText(text = "", profiles: Profiles) {
   // <@UXXXX> => @表示名
@@ -55,7 +48,7 @@ function formatSlackTs(ts: string) {
   };
 }
 
-export default function SlackChat() {
+export default function SlackChat({ channelId }: SlackChatProps) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [profiles, setProfiles] = useState<Profiles>({});
   const [me, setMe] = useState<string | undefined>();
@@ -63,34 +56,37 @@ export default function SlackChat() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  async function load(cursor?: string) {
-    setLoading(true);
-    const url = `/api/slack/history?channel=${CHANNEL_ID}${
-      cursor ? `&cursor=${cursor}` : ""
-    }`;
-    const r = await fetch(url, { cache: "no-store" });
-    const j = await r.json();
-    console.log("profiles", j.users);
+  const load = useCallback(
+    async (cursor?: string) => {
+      setLoading(true);
+      const url = `/api/slack/history?channel=${channelId}${
+        cursor ? `&cursor=${cursor}` : ""
+      }`;
+      const r = await fetch(url, { cache: "no-store" });
+      const j = await r.json();
+      console.log("profiles", j.users);
 
-    // 古い→新しいに並べ替え（最新を下に）
-    const sorted = (j.messages ?? [])
-      .slice()
-      .sort((a: Msg, b: Msg) => parseFloat(a.ts) - parseFloat(b.ts));
-    setMsgs(sorted);
-    setProfiles(j.users ?? {});
-    setMe(j.me);
-    setLoading(false);
-    requestAnimationFrame(() =>
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-    );
-  }
+      // 古い→新しいに並べ替え（最新を下に）
+      const sorted = (j.messages ?? [])
+        .slice()
+        .sort((a: Msg, b: Msg) => parseFloat(a.ts) - parseFloat(b.ts));
+      setMsgs(sorted);
+      setProfiles(j.users ?? {});
+      setMe(j.me);
+      setLoading(false);
+      requestAnimationFrame(() =>
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+      );
+    },
+    [channelId]
+  );
 
   async function send() {
     if (!text.trim()) return;
     const r = await fetch("/api/slack/post", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ channel: CHANNEL_ID, text }),
+      body: JSON.stringify({ channel: channelId, text }),
     });
     setText("");
     await load();
@@ -101,7 +97,7 @@ export default function SlackChat() {
   //   const r = await fetch("/api/slack/join", {
   //     method: "POST",
   //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ channel: CHANNEL_ID }),
+  //     body: JSON.stringify({ channel: channelId }),
   //   });
   //   const j = await r.json();
   //   if (j.ok) {
@@ -114,7 +110,11 @@ export default function SlackChat() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  const webUrl = SUBDOMAIN
+    ? `https://${SUBDOMAIN}.slack.com/archives/${channelId}`
+    : undefined;
 
   return (
     <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -271,6 +271,7 @@ export default function SlackChat() {
         className="dark:invert"
       >
         <TextField
+          id={channelId}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="メッセージを入力（Enterで送信 / Shift+Enterで改行）"

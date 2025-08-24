@@ -103,7 +103,6 @@ export default function CommunityDetail({ community, imageUrl }: Props) {
 
                 <Field label="作成者ID">{c.owner_id ?? "-"}</Field>
                 <Field label="作成">{c.created_at ?? "-"}</Field>
-                <Field label="画像パス">{c.image_path ?? "-"}</Field>
               </Stack>
             </Grid>
           </Grid>
