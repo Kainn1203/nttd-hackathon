@@ -1,3 +1,4 @@
+// DB の image_pat hから supabase storage に保存した画像のURL取得用
 import { createClient } from "@/lib/supabase/server";
 
 export async function getPublicImageUrl(path: string, bucket: string) {

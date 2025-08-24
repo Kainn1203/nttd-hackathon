@@ -1,3 +1,4 @@
+// DB読み込み用
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
