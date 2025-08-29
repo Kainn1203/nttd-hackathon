@@ -14,29 +14,44 @@ interface Member {
   first_name: string;
   hobby: string[];
   hobbyIds: number[];
+  university: string; // 追加: メンバーの大学情報
   image_path?: string | null;
 }
 
 interface Props {
   hobbies: Hobby[];
   members: Member[];
+  university: string | undefined; // ログインユーザーの大学
 }
 
-export default function HobbyFilter({ hobbies, members }: Props) {
+export default function HobbyFilter({ hobbies, members, university }: Props) {
   const [selectedHobbyIds, setSelectedHobbyIds] = useState<number[]>([]);
+  const [universityFilterActive, setUniversityFilterActive] = useState(false);
 
-  // 選択された趣味で AND フィルター
+  // 趣味 + 大学フィルターを適用
   const filteredMembers = useMemo(() => {
-    if (selectedHobbyIds.length === 0) return members;
-    return members.filter((member) =>
-      selectedHobbyIds.every((id) => member.hobbyIds.includes(id))
-    );
-  }, [selectedHobbyIds, members]);
+    return members.filter((member) => {
+      // 趣味フィルター
+      const hobbyMatch =
+        selectedHobbyIds.length === 0 ||
+        selectedHobbyIds.every((id) => member.hobbyIds.includes(id));
+
+      // 大学フィルター
+      const universityMatch =
+        !universityFilterActive || member.university === university;
+
+      return hobbyMatch && universityMatch;
+    });
+  }, [selectedHobbyIds, universityFilterActive, members, university]);
 
   const toggleHobby = (id: number) => {
     setSelectedHobbyIds((prev) =>
       prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
     );
+  };
+
+  const toggleUniversityFilter = () => {
+    setUniversityFilterActive((prev) => !prev);
   };
 
   return (
@@ -55,11 +70,17 @@ export default function HobbyFilter({ hobbies, members }: Props) {
           </Button>
         ))}
       </Grid>
+
       <Typography variant="h6" fontWeight="bold" mb={1}>
         大学で絞り込み
       </Typography>
-      <Button variant="outlined" sx={{ mb: 4 }}>
-        {"同じ大学"}
+      <Button
+        variant={universityFilterActive ? "contained" : "outlined"}
+        sx={{ mb: 4 }}
+        onClick={toggleUniversityFilter}
+        disabled={!university}
+      >
+        同じ大学
       </Button>
 
       <MembersIndex members={filteredMembers} />

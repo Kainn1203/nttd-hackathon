@@ -2,10 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { getPublicImageUrl } from "@/lib/supabase/image";
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import HobbyFilter from "@/components/member/HobbyFilterClient";
+import { getMe } from "@/lib/supabase/me";
+import { redirect } from "next/navigation";
 
 export default async function MemberPage() {
+  const me = await getMe();
+  if (!me) redirect("/login");
+
   const supabase = await createClient();
 
   // 全メンバー取得
@@ -55,7 +60,11 @@ export default async function MemberPage() {
       </Typography>
 
       {/* Client Component に趣味一覧とメンバー渡す */}
-      <HobbyFilter hobbies={hobbies} members={updatedMembers} />
+      <HobbyFilter
+        hobbies={hobbies}
+        members={updatedMembers}
+        university={me.university}
+      />
     </Box>
   );
 }

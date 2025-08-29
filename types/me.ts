@@ -13,5 +13,5 @@ export type Me = {
   firstName?: string;
   lastNameKana?: string;
   firstNameKana?: string;
-  universiry?: string;
+  university?: string;
 } | null;
