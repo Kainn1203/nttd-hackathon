@@ -47,9 +47,25 @@ export default async function Community(props: {
     return notFound();
   }
 
-  const imageUrl = data.image_path
-    ? await getPublicImageUrl(data.image_path, "community-images")
-    : undefined;
+// ★ デバッグ: データベースの値を確認
+  console.log("Community data:", data);
+  console.log("Original image_path:", data.image_path);
+
+  // 画像URLの処理を分岐
+  let imageUrl: string | undefined;
+  
+  if (data.image_path) {
+    // フルURLかどうかチェック
+    if (data.image_path.startsWith('http')) {
+      // 既にフルURLの場合はそのまま使用
+      imageUrl = data.image_path;
+      console.log("Using full URL:", imageUrl);
+    } else {
+      // パスの場合は変換
+      imageUrl = await getPublicImageUrl(data.image_path, "community-images");
+      console.log("Converted to public URL:", imageUrl);
+    }
+  }
 
   const channelId = data.slack_channel_id;
 

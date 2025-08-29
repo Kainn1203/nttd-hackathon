@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { UserProvider } from "@/components/UserProvider";
+import Header from "@/components/Header"; // ← 追加(ヘッダー部分)
 import { getMe } from "@/lib/supabase/me";
 
 const geistSans = Geist({
@@ -26,14 +27,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const me = await getMe();
-
+  
   return (
     <html lang="ja">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppRouterCacheProvider>
-          <UserProvider value={me}>{children}</UserProvider>
+          <UserProvider value={me}>
+            <Header /> {/* ← ヘッダーを追加 */}
+            {children}
+          </UserProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

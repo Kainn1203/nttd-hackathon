@@ -6,13 +6,20 @@ import { createClient } from '@/utils/supabase/client';
 
 import CommunityList from '@/components/communities/CommunityList';
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
+import { uploadImage } from '@/lib/supabase/image'; // ← 追加
 
 import type { Community } from '@/types/community';
 
+// ★ インターフェースを拡張（画像対応）
 interface NewCommunityForm {
   name: string;
   description: string;
+  iconFile?: File | null;
+  iconPreview?: string | null;
+  coverFile?: File | null;
+  coverPreview?: string | null;
 }
+
 interface CommunityWithMembers extends Community {
   member_count?: number;
   is_member?: boolean;
@@ -86,15 +93,22 @@ const useCommunities = () => {
   };
 };
 
-// ------- Main Component -------
-// ★ サーバーから受け取った meId を使う
 export default function CommunitiesMain({ meId }: { meId: number }) {
-  const router = useRouter(); // 画面遷移用
-  const [showCreateForm, setShowCreateForm] = useState(false); // モーダル表示/非表示
-  const [newCommunity, setNewCommunity] = useState<NewCommunityForm>({ name: '', description: '' }); // 新規作成フォームのデータ
-  const [isSubmitting, setIsSubmitting] = useState(false); // 送信中かどうか
+  const router = useRouter();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  
+  // ★ 初期値に画像プロパティを追加
+  const [newCommunity, setNewCommunity] = useState<NewCommunityForm>({ 
+    name: '', 
+    description: '',
+    iconFile: null,
+    iconPreview: null,
+    coverFile: null,
+    coverPreview: null,
+  });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 上で作ったカスタムフックを使う
   const {
     communities,
     userCommunities,
@@ -107,95 +121,151 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
     setLoading,
   } = useCommunities();
 
-  // 初回：一覧と自分の参加状況を取得
   useEffect(() => {
-    fetchCommunities(); // 全コミュニティを取得
+    fetchCommunities();
     if (meId != null) {
-      fetchUserCommunities(meId); // 自分の参加コミュニティを取得
+      fetchUserCommunities(meId);
     } else {
-      // 念のため（通常は meId は必ず来る）
       if (loading) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meId]); // meIdが変わった時だけ実行
+  }, [meId]);
 
+  // ★ 画像アップロード対応版のcreateeCommunity関数
   const createCommunity = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (meId == null || !newCommunity.name.trim() || isSubmitting) return;
+    e.preventDefault();
+    if (meId == null || !newCommunity.name.trim() || isSubmitting) return;
 
-  setIsSubmitting(true);
-  try {
-    const supabase = createClient();
-    
-    // 1. コミュニティ作成
-    const { data: community, error: communityError } = await supabase
-      .from('community')
-      .insert([
-        {
-          name: newCommunity.name.trim(),
-          description: newCommunity.description.trim(),
-          owner_id: meId,
-        },
-      ])
-      .select()
-      .single();
-    
-    if (communityError) throw communityError;
+    setIsSubmitting(true);
+    try {
+      console.log("=== コミュニティ作成開始 ===");
+      console.log("フォームデータ:", newCommunity);
+      console.log("アイコンファイル:", newCommunity.iconFile);
+      console.log("カバーファイル:", newCommunity.coverFile);
 
-    // 2. 作成者を自動的にメンバーに追加
-    const { error: memberError } = await supabase
-      .from('community_members')
-      .insert([
-        {
-          community_id: community.id,
-          user_id: meId,
-        },
-      ]);
-    
-    if (memberError) throw memberError;
+      const supabase = createClient();
+      
+      let iconUrl = null;
+      let coverUrl = null;
 
-    // 3. データ再取得とフォームリセット
-    await fetchCommunities();
-    await fetchUserCommunities(meId);
-    setNewCommunity({ name: '', description: '' });
-    setShowCreateForm(false);
-    
-  } catch (e) {
-    console.error('コミュニティ作成エラー:', e);
-    alert('コミュニティの作成に失敗しました');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      // アイコン画像のアップロード
+      if (newCommunity.iconFile) {
+        console.log("📤 アイコン画像アップロード開始...");
+        iconUrl = await uploadImage(newCommunity.iconFile, {
+          bucket: 'community-images', // 既存のバケットを使用
+          folder: 'icons'
+        });
+        console.log("✅ アイコンアップロード結果:", iconUrl);
+      }
+
+      // カバー画像のアップロード
+      if (newCommunity.coverFile) {
+        console.log("📤 カバー画像アップロード開始...");
+        coverUrl = await uploadImage(newCommunity.coverFile, {
+          bucket: 'community-images', // 既存のバケットを使用
+          folder: 'covers'
+        });
+        console.log("✅ カバーアップロード結果:", coverUrl);
+      }
+
+      // 1. コミュニティ作成（画像URL含む）
+      const communityData = {
+        name: newCommunity.name.trim(),
+        description: newCommunity.description.trim(),
+        owner_id: meId,
+        image_path: iconUrl || coverUrl, // アイコンを優先、なければカバー画像
+        // 分けて保存する場合は以下のように
+        // icon_url: iconUrl,
+        // cover_url: coverUrl,
+      };
+
+      console.log("💾 データベース保存データ:", communityData);
+
+      const { data: community, error: communityError } = await supabase
+        .from('community')
+        .insert([communityData])
+        .select()
+        .single();
+      
+      if (communityError) {
+        console.error("❌ コミュニティ作成エラー:", communityError);
+        throw communityError;
+      }
+
+      console.log("🎉 コミュニティ作成成功:", community);
+
+      // 2. 作成者を自動的にメンバーに追加
+      const { error: memberError } = await supabase
+        .from('community_members')
+        .insert([
+          {
+            community_id: community.id,
+            user_id: meId,
+          },
+        ]);
+      
+      if (memberError) {
+        console.error("❌ メンバー追加エラー:", memberError);
+        throw memberError;
+      }
+
+      // 3. データ再取得とフォームリセット
+      await fetchCommunities();
+      await fetchUserCommunities(meId);
+      
+      // ★ 画像プロパティも含めてリセット
+      setNewCommunity({ 
+        name: '', 
+        description: '',
+        iconFile: null,
+        iconPreview: null,
+        coverFile: null,
+        coverPreview: null,
+      });
+      
+      setShowCreateForm(false);
+      
+      console.log("🚀 コミュニティ作成完了");
+      
+    } catch (e) {
+      console.error('❌ コミュニティ作成失敗:', e);
+      alert('コミュニティの作成に失敗しました: ' + e.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleCommunityClick = (communityId: number) => {
     router.push(`/communities/${communityId}`);
   };
 
   const closeCreateForm = () => {
-    setNewCommunity({ name: '', description: '' });
+    // ★ 画像プロパティも含めてリセット
+    setNewCommunity({ 
+      name: '', 
+      description: '',
+      iconFile: null,
+      iconPreview: null,
+      coverFile: null,
+      coverPreview: null,
+    });
     setShowCreateForm(false);
   };
 
-// データを整理・分類
-// ------- Derived -------
+  // 以下、既存のコードそのまま（UI部分）
   const safeCommunities = (communities ?? []).filter(
     (c): c is CommunityWithMembers => !!c && typeof c.id === 'number'
   );
-  // 参加中のコミュニティだけを抽出
-  const myCommunities = safeCommunities.filter((c) => userCommunities.includes(c.id));
-  // 参加していないコミュニティだけを抽出
-  const otherCommunities = safeCommunities.filter((c) => !userCommunities.includes(c.id));
-  // 統計情報
-  const stats = {
-    totalCommunities: safeCommunities.length, // 全体の数
-    myCommunities: myCommunities.length, // 参加中の数
-    otherCommunities: otherCommunities.length, // 参加可能の数
-  };
   
-  // 画面の状態管理
-  // ------- UI States -------
-  if (loading) { //ローディング画面
+  const myCommunities = safeCommunities.filter((c) => userCommunities.includes(c.id));
+  const otherCommunities = safeCommunities.filter((c) => !userCommunities.includes(c.id));
+  
+  const stats = {
+    totalCommunities: safeCommunities.length,
+    myCommunities: myCommunities.length,
+    otherCommunities: otherCommunities.length,
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -206,14 +276,14 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
     );
   }
 
-  if (error) { // エラー画面
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">エラーが発生しました．</div>
           <div className="text-gray-600 mb-6">{error}</div>
           <button
-            onClick={() => window.location.reload()} //// ページをリロード
+            onClick={() => window.location.reload()}
             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
           >
             再読み込み
@@ -223,13 +293,9 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
     );
   }
 
-  // 未ログインガードUIは不要（サーバーで redirect 済み）
-  //  最終的な画面表示
-  // ------- Render -------
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        {/* ヘッダー部分 */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -239,9 +305,8 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
               </p>
             </div>
 
-            {/* 新規作成ボタン */}
             <button
-              onClick={() => setShowCreateForm(true)} // モーダルを表示
+              onClick={() => setShowCreateForm(true)}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
             >
               <span className="text-xl">+</span>
@@ -250,19 +315,19 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
           </div>
         </div>
 
-        {/* コミュニティリスト */}
         <CommunityList
-          myCommunities={myCommunities} // 参加中のコミュニティ
-          otherCommunities={otherCommunities} // 参加可能なコミュニティ
-          onCommunityClick={handleCommunityClick} // クリック時の処理
+          myCommunities={myCommunities}
+          otherCommunities={otherCommunities}
+          onCommunityClick={handleCommunityClick}
         />
+        
         <CreateCommunityModal
-          show={showCreateForm}  // 表示するかどうか
-          newCommunity={newCommunity}  // フォームのデータ
-          onSubmit={createCommunity}  // 送信処理
-          onClose={closeCreateForm}  // 閉じる処理
-          onChange={setNewCommunity}  // 入力時の処理
-          isSubmitting={isSubmitting}  // 送信中かどうか
+          show={showCreateForm}
+          newCommunity={newCommunity}
+          onSubmit={createCommunity} // ← 修正版のcreateeCommunity
+          onClose={closeCreateForm}
+          onChange={setNewCommunity}
+          isSubmitting={isSubmitting}
         />
       </div>
     </div>
