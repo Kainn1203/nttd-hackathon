@@ -68,23 +68,33 @@ export default function Header() {
                 width: "100%",
               }}
             >
-              {nav.map((n) => (
-                <Button
-                  key={n.href}
-                  component={Link}
-                  href={n.label === "内定者一覧" ? ichiranHref : n.href}
-                  startIcon={n.icon}
-                  size="small"
-                  color="primary"
-                  sx={{
-                    width: "100%",
-                    justifyContent: "center",
-                    fontWeight: 700,
-                  }}
-                >
-                  {n.label}
-                </Button>
-              ))}
+              {nav.map((n) => {
+                const targetHref = n.label === "内定者一覧" ? ichiranHref : n.href;
+                const isActive =
+                  pathname === n.href || pathname.startsWith(`${n.href}/`);
+                return (
+                  <Button
+                    key={n.href}
+                    component={Link}
+                    href={targetHref}
+                    startIcon={n.icon}
+                    size="small"
+                    color="primary"
+                    sx={{
+                      width: "100%",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      borderRadius: 1,
+                      backgroundColor: isActive ? "action.selected" : "transparent",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
+                    {n.label}
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
 
