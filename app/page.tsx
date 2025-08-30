@@ -24,14 +24,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 export default async function Home() {
   const me = await getMe();
   if (!me) redirect("/login");
-  // 画像URLはDBにフルURLで保存される場合があるため、
-  // フルURLならそのまま利用し、パスのみなら公開URLに変換する
-  let avatarUrl: string | undefined = undefined;
-  if (me?.imagePath) {
-    avatarUrl = me.imagePath.startsWith("http")
-      ? me.imagePath
-      : getPublicImageUrl("user-images", me.imagePath) ?? undefined;
-  }
+  const avatarUrl = me?.imagePath ? getPublicImageUrl("user-images", me.imagePath) ?? undefined : undefined;
 
   return (
     <main>

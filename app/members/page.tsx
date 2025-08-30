@@ -44,14 +44,12 @@ export default async function MemberPage() {
         .map((id) => hobbies.find((h) => h.id === id)?.hobby)
         .filter(Boolean) as string[];
 
-      let image_path: string | null = member.image_path;
-      if (image_path) {
-        image_path = image_path.startsWith("http")
-          ? image_path
-          : getPublicImageUrl("user-images", image_path) ?? null;
+      let imagePath = member.image_path;
+      if (imagePath) {
+        imagePath = await getPublicImageUrl(imagePath, "user-images");
       }
 
-      return { ...member, image_path, hobby: hobbyNames, hobbyIds };
+      return { ...member, hobby: hobbyNames, hobbyIds };
     })
   );
 
