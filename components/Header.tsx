@@ -31,8 +31,8 @@ const nav = [
 export default function Header() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname() ?? "/";
-  const base = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  const ichiranHref = `${base}/members`;
+  // 絶対パスで遷移させる（/communities/members にならないように）
+  const ichiranHref = "/members";
 
   return (
     <AppBar
