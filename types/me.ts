@@ -9,9 +9,8 @@
 //   pr?: string; // 自己PR
 // } | null;
 
-
 // types\me.ts
- 
+
 export type Me = {
   id: number; // 内定者ID
   authId: string; // SupabaseのUUID（内部処理用）
@@ -25,5 +24,5 @@ export type Me = {
   firstName?: string;
   lastNameKana?: string;
   firstNameKana?: string;
-  universiry?: string;
+  university?: string;
 } | null;

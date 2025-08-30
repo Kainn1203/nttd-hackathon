@@ -23,7 +23,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 import PersonIcon from "@mui/icons-material/Person";
 
 const nav = [
-  { href: "/candidates", label: "内定者一覧", icon: <GroupsIcon /> },
+  { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
 ];
@@ -32,7 +32,7 @@ export default function Header() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname() ?? "/";
   const base = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  const ichiranHref = `${base}/ICHIRAN`;
+  const ichiranHref = `${base}/members`;
 
   return (
     <AppBar
@@ -54,7 +54,7 @@ export default function Header() {
               fontSize: { xs: 16, sm: 18 },
               mr: 1.5,
             }}
-         >
+          >
             NTTデータ内定者向けコミュニティ
           </Typography>
 
@@ -76,7 +76,11 @@ export default function Header() {
                   startIcon={n.icon}
                   size="small"
                   color="primary"
-                  sx={{ width: "100%", justifyContent: "center", fontWeight: 700 }}
+                  sx={{
+                    width: "100%",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                  }}
                 >
                   {n.label}
                 </Button>
@@ -102,7 +106,11 @@ export default function Header() {
         onClose={() => setOpen(false)}
         ModalProps={{ keepMounted: true }}
       >
-        <Box role="presentation" sx={{ width: 260 }} onClick={() => setOpen(false)}>
+        <Box
+          role="presentation"
+          sx={{ width: 260 }}
+          onClick={() => setOpen(false)}
+        >
           <List>
             {nav.map((n) => (
               <ListItemButton key={n.href} component={Link} href={n.href}>
