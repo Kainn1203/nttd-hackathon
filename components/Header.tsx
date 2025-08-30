@@ -23,7 +23,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 import PersonIcon from "@mui/icons-material/Person";
 
 const nav = [
-  { href: "/candidates", label: "内定者一覧", icon: <GroupsIcon /> },
+  { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
 ];
@@ -31,8 +31,8 @@ const nav = [
 export default function Header() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname() ?? "/";
-  const base = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  const ichiranHref = `${base}/ICHIRAN`;
+  // 絶対パスで遷移させる（/communities/members にならないように）
+  const ichiranHref = "/members";
 
   return (
     <AppBar
@@ -54,7 +54,7 @@ export default function Header() {
               fontSize: { xs: 16, sm: 18 },
               mr: 1.5,
             }}
-         >
+          >
             NTTデータ内定者向けコミュニティ
           </Typography>
 
@@ -68,19 +68,35 @@ export default function Header() {
                 width: "100%",
               }}
             >
-              {nav.map((n) => (
-                <Button
-                  key={n.href}
-                  component={Link}
-                  href={n.label === "内定者一覧" ? ichiranHref : n.href}
-                  startIcon={n.icon}
-                  size="small"
-                  color="primary"
-                  sx={{ width: "100%", justifyContent: "center", fontWeight: 700 }}
-                >
-                  {n.label}
-                </Button>
-              ))}
+              {nav.map((n) => {
+                const targetHref = n.label === "内定者一覧" ? ichiranHref : n.href;
+                const isActive =
+                  pathname === n.href || pathname.startsWith(`${n.href}/`);
+                return (
+                  <Button
+                    key={n.href}
+                    component={Link}
+                    href={targetHref}
+                    startIcon={n.icon}
+                    size="small"
+                    color="primary"
+                    fullWidth
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      borderRadius: 1,
+                      backgroundColor: isActive ? "action.selected" : "transparent",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
+                    {n.label}
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
 
@@ -102,7 +118,11 @@ export default function Header() {
         onClose={() => setOpen(false)}
         ModalProps={{ keepMounted: true }}
       >
-        <Box role="presentation" sx={{ width: 260 }} onClick={() => setOpen(false)}>
+        <Box
+          role="presentation"
+          sx={{ width: 260 }}
+          onClick={() => setOpen(false)}
+        >
           <List>
             {nav.map((n) => (
               <ListItemButton key={n.href} component={Link} href={n.href}>
