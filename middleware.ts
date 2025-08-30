@@ -36,7 +36,7 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // 公開ページを列挙（必要に応じて追加）
-  const publicPaths = new Set<string>(["/login"]);
+  const publicPaths = new Set<string>(["/login", "/api/slack/oauth"]);
   const isPublic = [...publicPaths].some(
     (p) => path === p || path.startsWith(p + "/")
   );

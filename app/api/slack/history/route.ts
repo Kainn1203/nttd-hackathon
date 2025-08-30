@@ -82,3 +82,4 @@ export async function GET(req: Request) {
     me, // 追加
   });
 }
+import "@/lib/proxy";
