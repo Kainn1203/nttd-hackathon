@@ -113,7 +113,7 @@ export default async function Home() {
                 <Stack direction="row" spacing={1.5} sx={{ mt: 2 }} useFlexGap flexWrap="wrap">
                   <Button
                     component={Link}
-                    href="/profile"
+                    href="/myPage"
                     size="small"
                     variant="outlined"
                     startIcon={<PersonIcon />}
