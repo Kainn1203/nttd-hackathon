@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getPublicImageUrl } from "@/lib/supabase/image";
 import CommunityDetail from "@/components/community/CommunityDetail";
 import type { Community } from "@/types/community";
-import { Alert, AlertTitle, Container, Box, Stack } from "@mui/material";
+import { Alert, AlertTitle, Container, Box, Stack, Avatar, Paper, Typography } from "@mui/material";
 
 import SlackChat from "@/components/community/SlackChat ";
 import OAuth from "@/components/community/OAuth";
@@ -75,6 +75,13 @@ export default async function Community(props: {
   const me = await getMe();
   if (!me) redirect("/login");
   const meId = me.id;
+  // 自分のアバターURL（フルURL/パス両対応）
+  let meAvatarUrl: string | undefined = undefined;
+  if (me.imagePath) {
+    meAvatarUrl = me.imagePath.startsWith("http")
+      ? me.imagePath
+      : await getPublicImageUrl("user-images", me.imagePath) ?? undefined;
+  }
 
   // ★ 自身の参加判定
   let isMember = false;
@@ -160,7 +167,20 @@ export default async function Community(props: {
 
         {/* 右カラム */}
         <Box>
-          <MembersSidebar members={members} />
+          <Stack spacing={2}>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                あなたのプロフィール
+              </Typography>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Avatar src={meAvatarUrl} alt={me.name ?? "プロフィール"} sx={{ width: 40, height: 40 }} />
+                <Typography variant="subtitle1" fontWeight={700}>
+                  {me.name ?? "未設定"}
+                </Typography>
+              </Stack>
+            </Paper>
+            <MembersSidebar members={members} />
+          </Stack>
         </Box>
       </Box>
     </Container>
