@@ -2,9 +2,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/me";
+import { getPublicImageUrl } from "@/lib/supabase/image";
 
 import {
   Box,
+  Avatar,
   Button,
   Card,
   CardActionArea,
@@ -22,6 +24,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 export default async function Home() {
   const me = await getMe();
   if (!me) redirect("/login");
+  const avatarUrl = me?.imagePath ? getPublicImageUrl("user-images", me.imagePath) ?? undefined : undefined;
 
   return (
     <main>
@@ -127,9 +130,12 @@ export default async function Home() {
                 <Typography variant="subtitle2" color="text.secondary">
                   あなたのプロフィール
                 </Typography>
-                <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5 }}>
-                  {me.name ?? "未設定"}
-                </Typography>
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 0.5 }}>
+                  <Avatar src={avatarUrl} alt={me.name ?? "プロフィール"} sx={{ width: 40, height: 40 }} />
+                  <Typography variant="h6" fontWeight={800}>
+                    {me.name ?? "未設定"}
+                  </Typography>
+                </Stack>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack spacing={0.5}>
                   <Typography variant="body2">
