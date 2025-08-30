@@ -80,8 +80,10 @@ export default function Header() {
                     startIcon={n.icon}
                     size="small"
                     color="primary"
+                    fullWidth
                     sx={{
                       width: "100%",
+                      height: "100%",
                       justifyContent: "center",
                       fontWeight: 700,
                       borderRadius: 1,
