@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getPublicImageUrl } from "@/lib/supabase/image";
 import CommunityDetail from "@/components/community/CommunityDetail";
 import type { Community } from "@/types/community";
-import { Alert, AlertTitle, Container, Box, Stack, Avatar, Paper, Typography } from "@mui/material";
+import { Alert, AlertTitle, Container, Box, Stack } from "@mui/material";
 
 import SlackChat from "@/components/community/SlackChat ";
 import OAuth from "@/components/community/OAuth";
@@ -62,7 +62,7 @@ export default async function Community(props: {
       console.log("Using full URL:", imageUrl);
     } else {
       // パスの場合は変換
-      imageUrl = await getPublicImageUrl(data.image_path, "community-images");
+      imageUrl = await getPublicImageUrl("community-images", data.image_path);
       console.log("Converted to public URL:", imageUrl);
     }
   }
@@ -75,13 +75,6 @@ export default async function Community(props: {
   const me = await getMe();
   if (!me) redirect("/login");
   const meId = me.id;
-  // 自分のアバターURL（フルURL/パス両対応）
-  let meAvatarUrl: string | undefined = undefined;
-  if (me.imagePath) {
-    meAvatarUrl = me.imagePath.startsWith("http")
-      ? me.imagePath
-      : await getPublicImageUrl("user-images", me.imagePath) ?? undefined;
-  }
 
   // ★ 自身の参加判定
   let isMember = false;
@@ -112,9 +105,12 @@ export default async function Community(props: {
       const u = Array.isArray(r.user) ? r.user[0] : r.user;
       if (!u) return null;
 
-      const avatarUrl = u.image_path
-        ? await getPublicImageUrl(u.image_path, "user-images")
-        : undefined;
+      let avatarUrl: string | undefined = undefined;
+      if (u.image_path) {
+        avatarUrl = u.image_path.startsWith('http')
+          ? u.image_path
+          : getPublicImageUrl("user-images", u.image_path) ?? undefined;
+      }
       console.log("test");
 
       return {
@@ -167,20 +163,7 @@ export default async function Community(props: {
 
         {/* 右カラム */}
         <Box>
-          <Stack spacing={2}>
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                あなたのプロフィール
-              </Typography>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Avatar src={meAvatarUrl} alt={me.name ?? "プロフィール"} sx={{ width: 40, height: 40 }} />
-                <Typography variant="subtitle1" fontWeight={700}>
-                  {me.name ?? "未設定"}
-                </Typography>
-              </Stack>
-            </Paper>
-            <MembersSidebar members={members} />
-          </Stack>
+          <MembersSidebar members={members} />
         </Box>
       </Box>
     </Container>
