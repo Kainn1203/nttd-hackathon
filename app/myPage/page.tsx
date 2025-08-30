@@ -11,10 +11,12 @@ export default async function MyPage() {
   const me = await getMe();
   if (!me) redirect("/login");
 
-  // image_path が存在する場合のみ変換
+  // image_path がフルURLの場合はそのまま、パスのみなら公開URLに変換
   let processedMe = { ...me };
   if (me.imagePath) {
-    processedMe.imagePath = getPublicImageUrl("user-images", me.imagePath);
+    processedMe.imagePath = me.imagePath.startsWith("http")
+      ? me.imagePath
+      : getPublicImageUrl("user-images", me.imagePath) ?? undefined;
   }
 
   // 趣味マスタ取得
