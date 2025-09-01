@@ -10,6 +10,7 @@ import OAuth from "@/components/community/OAuth";
 import { getMe } from "@/lib/supabase/me";
 import JoinLeaveButtons from "@/components/community/JoinLeaveButtons";
 import MembersSidebar from "@/components/community/MembersSidebar";
+import SlackChannelSetup from "@/components/community/SlackChannelSetup";
 
 type MemberView = { id: number; name: string; imageUrl?: string };
 type UserRow = {
@@ -120,12 +121,11 @@ export default async function Community(props: {
               channelId ? (
                 <SlackChat channelId={channelId} />
               ) : (
-                <Container maxWidth="md" sx={{ py: 2, px: 0 }}>
-                  <Alert severity="info" variant="outlined">
-                    <AlertTitle>Slack チャンネル未設定</AlertTitle>
-                    このコミュニティに紐づく Slack チャンネルが未設定です。
-                  </Alert>
-                </Container>
+                <SlackChannelSetup 
+                  communityId={num}
+                  communityName={data.name}
+                  isOwner={data.owner_id === meId}
+                />
               )
             ) : (
               <OAuth />

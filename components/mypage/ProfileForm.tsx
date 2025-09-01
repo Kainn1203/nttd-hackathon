@@ -9,7 +9,6 @@ import {
   Select,
   MenuItem,
   Autocomplete,
-  Typography,
 } from "@mui/material";
 import ImageUpload from "@/components/ImageUpload/ImageUpload";
 
@@ -28,6 +27,57 @@ type Me = {
 };
 
 type HobbyOption = { id: number; hobby: string };
+
+const PREFS = [
+  "北海道",
+  "青森",
+  "岩手",
+  "宮城",
+  "秋田",
+  "山形",
+  "福島",
+  "茨城",
+  "栃木",
+  "群馬",
+  "埼玉",
+  "千葉",
+  "東京",
+  "神奈川",
+  "新潟",
+  "富山",
+  "石川",
+  "福井",
+  "山梨",
+  "長野",
+  "岐阜",
+  "静岡",
+  "愛知",
+  "三重",
+  "滋賀",
+  "京都",
+  "大阪",
+  "兵庫",
+  "奈良",
+  "和歌山",
+  "鳥取",
+  "島根",
+  "岡山",
+  "広島",
+  "山口",
+  "徳島",
+  "香川",
+  "愛媛",
+  "高知",
+  "福岡",
+  "佐賀",
+  "長崎",
+  "熊本",
+  "大分",
+  "宮崎",
+  "鹿児島",
+  "沖縄",
+  "海外",
+];
 
 export default function ProfileForm({
   me,
@@ -89,19 +139,17 @@ export default function ProfileForm({
   };
 
   // ★ ImageUploadコンポーネント用のハンドラー
-  const handleAvatarChange = (file: File | null, preview: string | null) => {
+  const handleAvatarChange = (file: File | null) => {
     setAvatarFile(file);
-    // プレビューは ImageUpload コンポーネント内で管理されるため不要
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onSubmit({
       ...formData,
       origin,
       hobby: selectedHobbyNames,
-      avatarFile: avatarFile, // ImageUploadから取得したFileオブジェクト
+      avatarFile: avatarFile,
     });
   };
 
@@ -116,17 +164,16 @@ export default function ProfileForm({
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "220px 1fr" },
-          gap: 10,
+          gap: 2,
           alignItems: "start",
         }}
       >
         {/* ★ ImageUploadコンポーネントを使用 */}
         <Box sx={{ textAlign: "center" }}>
           <ImageUpload
-            value={me.imagePath} // 既存の画像URL
+            value={me.imagePath}
             onChange={handleAvatarChange}
             label="プロフィール写真"
-            description="推奨: 正方形、512×512px以上"
             size="large"
             shape="circle"
             placeholder="写真を選択"
@@ -207,14 +254,7 @@ export default function ProfileForm({
               <MenuItem value="">
                 <em>出身地を選択してください</em>
               </MenuItem>
-              {[
-                "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島",
-                "茨城", "栃木", "群馬", "埼玉", "千葉", "東京", "神奈川",
-                "新潟", "富山", "石川", "福井", "山梨", "長野", "岐阜", "静岡",
-                "愛知", "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山",
-                "鳥取", "島根", "岡山", "広島", "山口", "徳島", "香川", "愛媛", "高知",
-                "福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄", "海外"
-              ].map((pref) => (
+              {PREFS.map((pref) => (
                 <MenuItem key={pref} value={pref}>
                   {pref}
                 </MenuItem>
