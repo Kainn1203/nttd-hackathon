@@ -37,29 +37,53 @@ const useCommunities = () => {
     setLoading(true);
     try {
       setError(null);
+      const supabase = createClient();
 
-      const { data, error } = await supabase
+      // A. コミュニティ本体
+      const { data: communities, error: cErr } = await supabase
         .from('community')
-        .select(`*, community_members(count)`)
+        .select('id, name, description, created_at, owner_id, image_path')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (cErr) {
+        console.error('community select error:', cErr);
+        throw cErr;
+      }
+
+      // B. RPCで人数
+      const { data: counts, error: rErr } = await supabase.rpc('get_member_counts');
+      if (rErr) {
+        console.error('rpc get_member_counts error:', rErr);
+        throw rErr;
+      }
+
+      // C. マージ
+      const countMap = new Map<number, number>(
+        (counts ?? []).map((row: any) => [Number(row.community_id), Number(row.member_count)])
+      );
 
       const communitiesWithCount =
-        data?.map((c: any) => ({
+        (communities ?? []).map((c: any) => ({
           ...c,
-          member_count: Array.isArray(c.community_members)
-            ? c.community_members.length
-            : (c.community_members?.count ?? 0),
-        })) ?? [];
+          member_count: countMap.get(Number(c.id)) ?? 0,
+        }));
+
       setCommunities(communitiesWithCount);
     } catch (e) {
-      console.error('コミュニティ取得エラー:', e);
+      console.error('コミュニティ取得エラー:');
+      // e が PostgREST のレスポンスなら message/status が入っているはず
+      try {
+        console.dir(e, { depth: null });
+      } catch {
+        console.log(String(e));
+      }
       setError('コミュニティの取得に失敗しました');
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const fetchUserCommunities = async (userId: number) => {
     setLoading(true);
