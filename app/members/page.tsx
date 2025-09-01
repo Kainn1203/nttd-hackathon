@@ -55,10 +55,13 @@ export default async function MemberPage() {
 
   return (
     <Box sx={{ p: 6 }}>
+<<<<<<< HEAD
       <Typography variant="h3" fontWeight="bold" mb={4} align="center">
         内定者一覧
       </Typography>
 
+=======
+>>>>>>> dev
       {/* Client Component に趣味一覧とメンバー渡す */}
       <HobbyFilter
         hobbies={hobbies}
