@@ -17,7 +17,8 @@ export default async function MemberPage() {
   const { data: members, error: errorMember } = await supabase
     .from("user")
     .select("*")
-    .order("last_name");
+    .order("last_name_katakana")
+    .order("first_name_katakana");
 
   if (errorMember) throw new Error(errorMember.message);
   if (!members) return notFound();
@@ -55,13 +56,10 @@ export default async function MemberPage() {
 
   return (
     <Box sx={{ p: 6 }}>
-<<<<<<< HEAD
-      <Typography variant="h3" fontWeight="bold" mb={4} align="center">
+      <Typography variant="h5" fontWeight="bold" mb={4}>
         内定者一覧
       </Typography>
 
-=======
->>>>>>> dev
       {/* Client Component に趣味一覧とメンバー渡す */}
       <HobbyFilter
         hobbies={hobbies}
