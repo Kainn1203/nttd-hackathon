@@ -52,7 +52,7 @@ export default async function MyPage() {
   return (
     <Box sx={{ p: 6 }}>
       <Typography variant="h3" fontWeight="bold" mb={4} align="center">
-        プロフィール登録
+        プロフィール登録・編集
       </Typography>
       <ProfileFormWrapper me={me} hobbyOptions={hobby} userHobby={userHobby} />
     </Box>
