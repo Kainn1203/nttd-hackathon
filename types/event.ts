@@ -50,3 +50,10 @@ export type CandidateVoteStatus = {
   total_count: number;
   is_recommended: boolean;
 };
+
+export type EventAnnouncement = {
+  id: number;
+  event_id: number;
+  description: string;
+  created_at: string;
+};

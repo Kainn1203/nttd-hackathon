@@ -13,6 +13,7 @@ import EventVoteForm from "@/components/events/EventVoteForm";
 import EventResults from "@/components/events/EventResults";
 import EventMembersSidebar from "@/components/events/EventMembersSidebar";
 import SlackChannelInvite from "@/components/events/SlackChannelInvite";
+import AnnouncementList from "@/components/events/AnnouncementList";
 
 type EventWithCandidates = Event & {
   candidates: CandidateDate[];
@@ -190,7 +191,11 @@ export default async function EventPage(props: {
       >
         {/* 左カラム */}
         <Stack spacing={2}>
-          <EventDetail event={eventWithCandidates} ownerName={ownerName} />
+          <EventDetail
+            event={eventWithCandidates}
+            ownerName={ownerName}
+            isOwner={isOwner}
+          />
 
           {event.is_finalized && (
             <SlackChannelInvite
@@ -219,9 +224,10 @@ export default async function EventPage(props: {
         </Stack>
 
         {/* 右カラム */}
-        <Box>
+        <Stack spacing={2}>
           <EventMembersSidebar members={memberViews} />
-        </Box>
+          <AnnouncementList eventId={event.id} />
+        </Stack>
       </Box>
     </Container>
   );
