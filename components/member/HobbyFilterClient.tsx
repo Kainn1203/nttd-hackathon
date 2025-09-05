@@ -14,8 +14,15 @@ interface Member {
   first_name: string;
   hobby: string[];
   hobbyIds: number[];
-  university: string; // 追加: メンバーの大学情報
+  university: string;
   image_path?: string | null;
+  last_name_katakana: string;
+  first_name_katakana: string;
+  handle_name: string;
+  origin: string;
+  pr: string;
+  scores: number;
+  diagnosis_result: string;
 }
 
 interface Props {
