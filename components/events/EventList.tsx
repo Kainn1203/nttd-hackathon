@@ -3,72 +3,103 @@
 import { useState } from "react";
 import EventCard from "./EventCard";
 
-// Types - 既存の型定義を使用
+// Types
 import type { Event } from "@/types/event";
 
-interface CommunityWithMembers extends Event {
-  //メンバー数情報を追加した拡張型
+interface EventWithMembers extends Event {
   member_count?: number;
   is_member?: boolean;
+  candidate_date?: [];
 }
 
-interface CommunityListProps {
-  //親から受け取るデータの型
-  myCommunities: CommunityWithMembers[];
-  otherCommunities: CommunityWithMembers[];
-  onCommunityClick: (eventId: number) => void;
+interface EventListProps {
+  myEvents: EventWithMembers[];
+  otherEvents: EventWithMembers[];
+  onEventClick: (eventId: number) => void;
 }
 
 interface FilterState {
-  //フィルター・ソート条件の型
   search: string;
-  sortBy: "newest" | "oldest" | "members" | "name";
-  showJoinedOnly: boolean;
+  sortBy: "default" | "newest" | "oldest" | "members" | "name";
+  showAllEvents: boolean;
 }
 
 export default function EventList({
-  myCommunities,
-  otherCommunities,
-  onCommunityClick,
-}: CommunityListProps) {
+  myEvents,
+  otherEvents,
+  onEventClick,
+}: EventListProps) {
   const [filter, setFilter] = useState<FilterState>({
     search: "",
-    sortBy: "newest",
-    showJoinedOnly: false,
+    sortBy: "default",
+    showAllEvents: false,
   });
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Filter and sort communities
-  const filterCommunities = (communities: CommunityWithMembers[]) => {
-    // Community[] → CommunityWithMembers[] に変更
-    let filtered = communities;
+  // Filter and sort events
+  const filterEvents = (events: EventWithMembers[]) => {
+    let filtered = events;
 
-    // 検索フィルター
+    // Search filter
     if (filter.search) {
       filtered = filtered.filter(
-        (community) =>
-          community.name.toLowerCase().includes(filter.search.toLowerCase()) ||
-          (community.description?.toLowerCase() || "").includes(
+        (event) =>
+          event.name.toLowerCase().includes(filter.search.toLowerCase()) ||
+          (event.description?.toLowerCase() || "").includes(
             filter.search.toLowerCase()
-          ) // null チェック追加
+          )
       );
+    }
+
+    // 開催済みイベントを非表示にするフィルター（チェックが入っていない場合）
+    if (!filter.showAllEvents) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // 時間をクリアして日付のみ比較
+      filtered = filtered.filter((event) => {
+        if (!event.finalized_date) return true; // finalized_date がないものは表示
+        const finalizedDate = new Date(event.finalized_date);
+        return finalizedDate >= today; // 今日以降のもののみ
+      });
     }
 
     // Sort
     filtered.sort((a, b) => {
       switch (filter.sortBy) {
-        case "newest": //新しい順（作成日時の降順）
-          const dateB = b.created_at ? new Date(b.created_at) : new Date(0); // null チェック
-          const dateA = a.created_at ? new Date(a.created_at) : new Date(0); // null チェック
-          return dateB.getTime() - dateA.getTime();
-        case "oldest": //古い順（作成日時の昇順）
-          const dateAOld = a.created_at ? new Date(a.created_at) : new Date(0); // null チェック
-          const dateBOld = b.created_at ? new Date(b.created_at) : new Date(0); // null チェック
-          return dateAOld.getTime() - dateBOld.getTime();
-        case "members": // メンバー数の多い順
-          return (b.member_count || 0) - (a.member_count || 0); // member_countは CommunityWithMembers で定義済みなのでOK
-        case "name": //名前順
+        case "default":
+          // is_finalized: false を優先
+          if (a.is_finalized !== b.is_finalized) {
+            return a.is_finalized ? 1 : -1;
+          }
+          // finalized_date が新しい順
+          const finalizedA = a.finalized_date
+            ? new Date(a.finalized_date).getTime()
+            : 0;
+          const finalizedB = b.finalized_date
+            ? new Date(b.finalized_date).getTime()
+            : 0;
+          if (finalizedA !== finalizedB) {
+            return finalizedB - finalizedA;
+          }
+          // created_at が新しい順
+          return (
+            (b.created_at ? new Date(b.created_at).getTime() : 0) -
+            (a.created_at ? new Date(a.created_at).getTime() : 0)
+          );
+
+        case "newest":
+          return (
+            (b.created_at ? new Date(b.created_at).getTime() : 0) -
+            (a.created_at ? new Date(a.created_at).getTime() : 0)
+          );
+        case "oldest":
+          return (
+            (a.created_at ? new Date(a.created_at).getTime() : 0) -
+            (b.created_at ? new Date(b.created_at).getTime() : 0)
+          );
+        case "members":
+          return (b.member_count || 0) - (a.member_count || 0);
+        case "name":
           return a.name.localeCompare(b.name);
         default:
           return 0;
@@ -78,28 +109,24 @@ export default function EventList({
     return filtered;
   };
 
-  // 追加：null/undefined な要素を除去（型は CommunityWithMembers で想定）
-  const safeMy = (myCommunities ?? []).filter(
-    (c): c is CommunityWithMembers => !!c && typeof c.id === "number"
+  const safeMyEvents = (myEvents ?? []).filter(
+    (e): e is EventWithMembers => !!e && typeof e.id === "number"
   );
-  const safeOther = (otherCommunities ?? []).filter(
-    (c): c is CommunityWithMembers => !!c && typeof c.id === "number"
+  const safeOtherEvents = (otherEvents ?? []).filter(
+    (e): e is EventWithMembers => !!e && typeof e.id === "number"
   );
 
-  // 既存の filtered 系を safe 系から作るように少し差し替え
-  const filteredMyCommunities = filterCommunities(safeMy);
-  const filteredOtherCommunities = filterCommunities(safeOther);
+  const filteredMyEvents = filterEvents(safeMyEvents);
+  const filteredOtherEvents = filterEvents(safeOtherEvents);
 
-  const displayCommunities = filter.showJoinedOnly
-    ? filteredMyCommunities
-    : [...filteredMyCommunities, ...filteredOtherCommunities];
+  const displayEvents = filter.showAllEvents
+    ? [...filteredMyEvents, ...filteredOtherEvents]
+    : [...filteredMyEvents, ...filteredOtherEvents];
 
-  const isEmpty = displayCommunities.length === 0;
-  const hasNoCommunities =
-    myCommunities.length === 0 && otherCommunities.length === 0;
+  const isEmpty = displayEvents.length === 0;
+  const hasNoEvents = myEvents.length === 0 && otherEvents.length === 0;
 
   return (
-    // UI
     <div className="space-y-6">
       {/* Search and Filter Controls */}
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -136,20 +163,18 @@ export default function EventList({
 
           {/* Controls */}
           <div className="flex items-center gap-4">
-            {/* フィルター切り替え */}
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                checked={filter.showJoinedOnly}
+                checked={filter.showAllEvents}
                 onChange={(e) =>
-                  setFilter({ ...filter, showJoinedOnly: e.target.checked })
-                } //チェックボックスで参加中のコミュニティのみ表示を切り替え
+                  setFilter({ ...filter, showAllEvents: e.target.checked })
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              参加中のみ
+              開催済みイベントを表示
             </label>
 
-            {/* Sort */}
             <select
               value={filter.sortBy}
               onChange={(e) =>
@@ -157,18 +182,18 @@ export default function EventList({
                   ...filter,
                   sortBy: e.target.value as FilterState["sortBy"],
                 })
-              } //プルダウンでソート条件を選択
+              }
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="default">おすすめ順</option>
               <option value="newest">新しい順</option>
               <option value="oldest">古い順</option>
               <option value="members">メンバー数順</option>
               <option value="name">名前順</option>
             </select>
 
-            {/* 表示モード切り替え */}
             <div className="flex bg-gray-100 rounded-lg p-1">
-              <button //グリッド/リスト表示の切り替えボタン
+              <button
                 onClick={() => setViewMode("grid")}
                 className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                   viewMode === "grid"
@@ -204,23 +229,14 @@ export default function EventList({
           </div>
         </div>
 
-        {/* Results Count */}
         <div className="mt-4 text-sm text-gray-600">
-          {filter.showJoinedOnly ? (
-            <>参加中のイベント: {filteredMyCommunities.length}個</>
-          ) : (
-            <>
-              全{displayCommunities.length}個のイベント (参加中:{" "}
-              {filteredMyCommunities.length}個, 参加可能:{" "}
-              {filteredOtherCommunities.length}個)
-            </>
-          )}
+          全{displayEvents.length}個のイベント (参加: {filteredMyEvents.length}
+          個, 未参加: {filteredOtherEvents.length}
+          個)
         </div>
       </div>
 
-      {/* 条件分岐表示部分 */}
-      {hasNoCommunities ? (
-        // コミュニティが全く存在しない場合
+      {hasNoEvents ? (
         <div className="text-center py-16 bg-white rounded-lg shadow-sm">
           <div className="text-6xl mb-4">🌟</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -234,7 +250,6 @@ export default function EventList({
           </div>
         </div>
       ) : isEmpty ? (
-        // フィルター結果が空の場合
         <div className="text-center py-16 bg-white rounded-lg shadow-sm">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -245,7 +260,11 @@ export default function EventList({
           </p>
           <button
             onClick={() =>
-              setFilter({ search: "", sortBy: "newest", showJoinedOnly: false })
+              setFilter({
+                search: "",
+                sortBy: "default",
+                showAllEvents: false,
+              })
             }
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
@@ -254,15 +273,14 @@ export default function EventList({
         </div>
       ) : (
         <>
-          {/* コミュニティリスト表示 */}
-          {!filter.showJoinedOnly && filteredMyCommunities.length > 0 && (
+          {filteredMyEvents.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  参加中のイベント
+                  参加イベント
                 </h2>
                 <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
-                  {filteredMyCommunities.length}個
+                  {filteredMyEvents.length}個
                 </span>
               </div>
 
@@ -273,28 +291,27 @@ export default function EventList({
                     : "space-y-4"
                 }
               >
-                {filteredMyCommunities.map((community) => (
+                {filteredMyEvents.map((event) => (
                   <EventCard
-                    key={community.id}
-                    event={community}
+                    key={event.id}
+                    event={event}
                     isMember={true}
                     viewMode={viewMode}
-                    onEventClick={onCommunityClick}
+                    onEventClick={onEventClick}
                   />
                 ))}
               </div>
             </div>
           )}
 
-          {/* 他のコミュニティ */}
-          {!filter.showJoinedOnly && filteredOtherCommunities.length > 0 && (
+          {filteredOtherEvents.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  参加可能なイベント
+                  未参加イベント
                 </h2>
-                <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">
-                  {filteredOtherCommunities.length}個
+                <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
+                  {filteredOtherEvents.length}個
                 </span>
               </div>
 
@@ -305,45 +322,13 @@ export default function EventList({
                     : "space-y-4"
                 }
               >
-                {filteredOtherCommunities.map((community) => (
+                {filteredOtherEvents.map((event) => (
                   <EventCard
-                    key={community.id}
-                    event={community}
+                    key={event.id}
+                    event={event}
                     isMember={false}
                     viewMode={viewMode}
-                    onEventClick={onCommunityClick}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 参加しているコミュニティのみ */}
-          {filter.showJoinedOnly && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  参加中のイベント
-                </h2>
-                <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
-                  {filteredMyCommunities.length}個
-                </span>
-              </div>
-
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    : "space-y-4"
-                }
-              >
-                {filteredMyCommunities.map((community) => (
-                  <EventCard
-                    key={community.id}
-                    event={community}
-                    isMember={true}
-                    viewMode={viewMode}
-                    onEventClick={onCommunityClick}
+                    onEventClick={onEventClick}
                   />
                 ))}
               </div>

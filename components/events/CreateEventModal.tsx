@@ -1,19 +1,36 @@
-// CreateEventModal.tsx
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { ja } from "date-fns/locale";
 
-interface NewEventForm {
-  name: string;
-  description: string;
-  startDate?: Date | null; // 開始日時
-  endDate?: Date | null; // 終了日時
-  capacity?: number;
-  location?: string;
-  recruitmentEnd?: Date | null;
+import type { NewEventForm } from "@/types/event";
+
+function CustomDay(props: PickersDayProps & { selectedDays?: Date[] }) {
+  const { day, selectedDays = [], ...other } = props;
+  const isSelected = selectedDays.some(
+    (selected) => selected.toDateString() === day.toDateString()
+  );
+  return (
+    <PickersDay
+      {...other}
+      day={day}
+      sx={{
+        bgcolor: isSelected ? "primary.main" : undefined,
+        color: isSelected ? "white" : undefined,
+      }}
+    />
+  );
 }
 
 interface CreateEventModalProps {
@@ -33,19 +50,60 @@ export default function CreateEventModal({
   onClose,
   onChange,
 }: CreateEventModalProps) {
-  if (!show) return null;
+  // --- 追加: ドラッグ選択用の状態 ---
+  const [dragging, setDragging] = useState(false);
+
+  // --- 修正: 日付追加・削除 + 自動ソート ---
+  const handleDateSelect = (date: Date | null) => {
+    if (!date) return;
+    onChange((prev) => {
+      const dates = prev.candidate_dates ?? [];
+      const exists = dates.some(
+        (d) => new Date(d).toDateString() === date.toDateString()
+      );
+      const updated = exists
+        ? dates.filter(
+            (d) => new Date(d).toDateString() !== date.toDateString()
+          )
+        : [...dates, date];
+
+      // 自動ソート
+      updated.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+      return { ...prev, candidate_dates: updated };
+    });
+  };
+
+  // --- 追加: 個別削除機能 ---
+  const handleRemoveDate = (dateToRemove: Date) => {
+    onChange((prev) => ({
+      ...prev,
+      candidate_dates: prev.candidate_dates?.filter(
+        (d) =>
+          new Date(d).toDateString() !== new Date(dateToRemove).toDateString()
+      ),
+    }));
+  };
+
+  // --- 追加: ドラッグ中の処理 ---
+  const handleMouseDown = () => setDragging(true);
+  const handleMouseUp = () => setDragging(false);
+  const handleMouseEnter = (date: Date) => {
+    if (dragging) handleDateSelect(date);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-lg rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
-            新しいイベントを作成
-          </h2>
-        </div>
-
-        <form onSubmit={onSubmit}>
-          <div className="px-6 py-4 space-y-6">
+    <Dialog
+      open={show}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: 3 } }}
+    >
+      <DialogTitle>新しいイベントを作成</DialogTitle>
+      <form onSubmit={onSubmit}>
+        <DialogContent dividers>
+          <div className="space-y-6">
             {/* 名称 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -64,35 +122,73 @@ export default function CreateEventModal({
             </div>
 
             {/* 日程 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                日程<span className="text-red-500 ml-1">*</span>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
+                開催候補日<span className="text-red-500 ml-1">*</span>
               </label>
-              <div className="flex flex-col sm:flex-row gap-4">
+
+              <div className="flex flex-col lg:flex-row gap-6">
                 <LocalizationProvider
                   dateAdapter={AdapterDateFns}
                   adapterLocale={ja}
                 >
-                  <DatePicker
-                    label="開始日"
-                    value={newEvent.startDate || null}
-                    onChange={(newValue) =>
-                      onChange((prev) => ({ ...prev, startDate: newValue }))
-                    }
-                  />
+                  <div
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <DateCalendar
+                      value={null}
+                      onChange={handleDateSelect}
+                      slots={{
+                        day: (dayProps) => (
+                          <div
+                            onMouseEnter={() => handleMouseEnter(dayProps.day)}
+                            style={{ cursor: dragging ? "pointer" : "default" }}
+                          >
+                            <CustomDay
+                              {...dayProps}
+                              selectedDays={
+                                newEvent.candidate_dates?.map(
+                                  (d) => new Date(d)
+                                ) || []
+                              }
+                            />
+                          </div>
+                        ),
+                      }}
+                    />
+                  </div>
                 </LocalizationProvider>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={ja}
-                >
-                  <DatePicker
-                    label="終了日"
-                    value={newEvent.endDate || null}
-                    onChange={(newValue) =>
-                      onChange((prev) => ({ ...prev, endDate: newValue }))
-                    }
-                  />
-                </LocalizationProvider>
+
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    選択した日付
+                  </h3>
+                  {newEvent.candidate_dates?.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {newEvent.candidate_dates.map((d, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                        >
+                          {new Date(d).toLocaleDateString()}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDate(d)}
+                            className="ml-2 text-blue-500 hover:text-blue-700"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm">
+                      まだ日付が選択されていません
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -104,11 +200,11 @@ export default function CreateEventModal({
               <input
                 type="number"
                 min={2}
-                value={newEvent.capacity ?? ""}
+                value={newEvent.max_participants ?? ""}
                 onChange={(e) =>
                   onChange((prev) => ({
                     ...prev,
-                    capacity: Number(e.target.value),
+                    max_participants: Number(e.target.value),
                   }))
                 }
                 placeholder="例：6"
@@ -144,9 +240,9 @@ export default function CreateEventModal({
                 adapterLocale={ja}
               >
                 <DatePicker
-                  value={newEvent.recruitmentEnd || null}
+                  value={newEvent.deadline || null}
                   onChange={(newValue) =>
-                    onChange((prev) => ({ ...prev, recruitmentEnd: newValue }))
+                    onChange((prev) => ({ ...prev, deadline: newValue }))
                   }
                 />
               </LocalizationProvider>
@@ -168,30 +264,29 @@ export default function CreateEventModal({
               />
             </div>
           </div>
+        </DialogContent>
 
-          <div className="px-6 py-4 border-t flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-              disabled={isSubmitting}
-            >
-              キャンセル
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !newEvent.name.trim()}
-              className={`px-4 py-2 rounded-lg text-white transition-colors ${
-                isSubmitting
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {isSubmitting ? "作成中…" : "作成する"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={onClose} disabled={isSubmitting} variant="outlined">
+            キャンセル
+          </Button>
+          <Button
+            type="submit"
+            disabled={
+              isSubmitting ||
+              !newEvent.name.trim() ||
+              !newEvent.location.trim() ||
+              !newEvent.max_participants ||
+              !newEvent.deadline ||
+              newEvent.candidate_dates.length === 0
+            }
+            variant="contained"
+            color="primary"
+          >
+            {isSubmitting ? "作成中…" : "作成する"}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }

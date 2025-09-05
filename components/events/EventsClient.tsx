@@ -6,179 +6,122 @@ import { createClient } from "@/utils/supabase/client";
 
 import EventList from "@/components/events/EventList";
 import CreateEventModal from "@/components/events/CreateEventModal";
-import { uploadImage } from "@/lib/supabase/image";
 
-import type { Event } from "@/types/event";
+import type { Event, NewEventForm } from "@/types/event";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Typography,
+  Paper,
+} from "@mui/material";
 
-// ★ インターフェースを拡張（画像対応）
-interface NewCommunityForm {
-  name: string;
-  description: string;
-  iconFile?: File | null;
-  iconPreview?: string | null;
-  coverFile?: File | null;
-  coverPreview?: string | null;
-}
-
-interface CommunityWithMembers extends Event {
+interface EventWithMembers extends Event {
   member_count?: number;
   is_member?: boolean;
+  candidate_date?: [];
 }
 
 // ------- Hooks -------
-const useCommunities = () => {
-  const [communities, setCommunities] = useState<CommunityWithMembers[]>([]);
-  const [userCommunities, setUserCommunities] = useState<number[]>([]);
+const useEvents = () => {
+  const [events, setEvents] = useState<EventWithMembers[]>([]);
+  const [userEvents, setUserEvents] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
-  const fetchCommunities = async () => {
+  const fetchEvents = async () => {
     setLoading(true);
     try {
       setError(null);
 
-      const { data, error } = await supabase
-        .from("community")
-        .select(`*, community_members(count)`)
+      const { data: eventsData, error: eventsError } = await supabase
+        .from("events")
+        .select(`*, event_members(count)`)
+        .order("is_finalized", { ascending: false })
+        .order("finalized_date", { ascending: false })
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (eventsError) {
+        console.error("event select error:", eventsError);
+        throw eventsError;
+      }
 
-      const communitiesWithCount =
-        data?.map((c: any) => ({
-          ...c,
-          member_count: Array.isArray(c.community_members)
-            ? c.community_members.length
-            : c.community_members?.count ?? 0,
-        })) ?? [];
-      setCommunities(communitiesWithCount);
+      // B. RPCで人数
+      const { data: counts, error: rErr } = await supabase.rpc(
+        "get_member_counts"
+      );
+      if (rErr) {
+        console.error("rpc get_member_counts error:", rErr);
+        throw rErr;
+      }
+
+      // C. マージ
+      const countMap = new Map<number, number>(
+        (counts ?? []).map((row: any) => [
+          Number(row.event_id),
+          Number(row.member_count),
+        ])
+      );
+
+      const eventsWithCount: EventWithMembers[] = await Promise.all(
+        eventsData.map(async (e: any) => {
+          const { data: candidateDates, error: dateError } = await supabase
+            .from("candidate_date")
+            .select("candidate_date")
+            .eq("event_id", e.id)
+            .order("candidate_date", { ascending: true });
+
+          if (dateError) console.error("候補日取得エラー:", dateError);
+
+          return {
+            ...e,
+            member_count:
+              e.event_members?.[0]?.count ?? countMap.get(Number(e.id)) ?? 0,
+            candidate_date: candidateDates?.map((d) => d.candidate_date) ?? [],
+          };
+        })
+      );
+
+      setEvents(eventsWithCount);
     } catch (e) {
-      console.error("コミュニティ取得エラー:", e);
-      setError("コミュニティの取得に失敗しました");
+      console.error("イベント取得エラー:", e);
+      setError("イベントの取得に失敗しました");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUserCommunities = async (userId: number) => {
+  const fetchUserEvents = async (userId: number) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("community_members")
-        .select("community_id")
+        .from("event_members")
+        .select("event_id")
         .eq("user_id", userId);
       if (error) throw error;
-      setUserCommunities(data?.map((d) => d.community_id) ?? []);
+      setUserEvents(data?.map((d) => d.event_id) ?? []);
     } catch (e) {
-      console.error("ユーザーコミュニティ取得エラー:", e);
-      setError("ユーザーのコミュニティ情報取得に失敗しました");
+      console.error("ユーザーイベント取得エラー:", e);
+      setError("ユーザーのイベント情報取得に失敗しました");
     } finally {
       setLoading(false);
     }
   };
 
   return {
-    communities,
-    userCommunities,
+    events,
+    userEvents,
     loading,
     error,
-    fetchCommunities,
-    fetchUserCommunities,
-    setCommunities,
-    setUserCommunities,
+    fetchEvents,
+    fetchUserEvents,
+    setEvents,
+    setUserEvents,
     setLoading,
   };
 };
-
-// Slackチャンネル作成関数
-async function createSlackChannel(
-  communityId: number,
-  communityName: string,
-  communityDescription: string,
-  slackUserToken: string | undefined
-) {
-  try {
-    console.log("🚀 Slackチャンネル作成開始:", {
-      communityId,
-      communityName,
-      communityDescription,
-    });
-
-    // 1. Slack認証トークンの確認
-    if (!slackUserToken) {
-      console.log("📝 Slack認証トークンがありません");
-      console.log("💡 Slack認証が必要です。まずSlack認証を完了してください。");
-      return; // Slack認証がない場合は何もしない
-    }
-
-    console.log(
-      "🔑 Slack認証トークン取得完了:",
-      slackUserToken.substring(0, 10) + "..."
-    );
-
-    // 2. Slackチャンネル作成APIを呼び出し
-    console.log("📡 Slackチャンネル作成API呼び出し開始");
-    const response = await fetch("/api/slack/channel/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: communityName,
-        description: communityDescription,
-      }),
-    });
-
-    console.log("📡 APIレスポンス:", {
-      status: response.status,
-      statusText: response.statusText,
-    });
-
-    const data = await response.json();
-    console.log("📡 Slackチャンネル作成APIレスポンス:", {
-      status: response.status,
-      data,
-    });
-
-    if (!response.ok) {
-      throw new Error(data.error || "Slackチャンネル作成に失敗しました");
-    }
-
-    console.log("✅ Slackチャンネル作成成功:", data.channel);
-
-    // 3. 作成したチャンネルIDをDBに保存
-    console.log("💾 チャンネルID保存開始:", data.channel.id);
-    const updateResponse = await fetch(
-      `/api/community/${communityId}/slack-channel`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slack_channel_id: data.channel.id }),
-      }
-    );
-
-    console.log("💾 保存APIレスポンス:", {
-      status: updateResponse.status,
-      statusText: updateResponse.statusText,
-    });
-
-    if (!updateResponse.ok) {
-      const updateErrorData = await updateResponse
-        .json()
-        .catch(() => ({ error: "レスポンスの解析に失敗" }));
-      throw new Error(
-        `チャンネルIDの保存に失敗しました: ${updateResponse.status} - ${
-          updateErrorData.error || updateResponse.statusText
-        }`
-      );
-    }
-
-    console.log("💾 SlackチャンネルID保存成功:", data.channel.id);
-    return data.channel;
-  } catch (error) {
-    console.error("❌ Slackチャンネル作成エラー:", error);
-    throw error;
-  }
-}
 
 export default function EventsClient({
   meId,
@@ -190,265 +133,226 @@ export default function EventsClient({
   const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const [newCommunity, setNewCommunity] = useState<NewCommunityForm>({
+  const [newEvent, setNewEvent] = useState<NewEventForm>({
     name: "",
     description: "",
-    iconFile: null,
-    iconPreview: null,
-    coverFile: null,
-    coverPreview: null,
+    location: "",
+    deadline: null,
+    max_participants: null,
+    candidate_dates: [],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    communities,
-    userCommunities,
+    events,
+    userEvents,
     loading,
     error,
-    fetchCommunities,
-    fetchUserCommunities,
-    setCommunities,
-    setUserCommunities,
+    fetchEvents,
+    fetchUserEvents,
     setLoading,
-  } = useCommunities();
+  } = useEvents();
 
   useEffect(() => {
-    fetchCommunities();
+    fetchEvents();
     if (meId != null) {
-      fetchUserCommunities(meId);
+      fetchUserEvents(meId);
     } else {
       if (loading) setLoading(false);
     }
   }, [meId]);
 
-  const createCommunity = async (e: React.FormEvent) => {
+  const createEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (meId == null || !newCommunity.name.trim() || isSubmitting) return;
+    if (meId == null || !newEvent.name.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      console.log("=== コミュニティ作成開始 ===");
-      console.log("フォームデータ:", newCommunity);
-      console.log("アイコンファイル:", newCommunity.iconFile);
-      console.log("カバーファイル:", newCommunity.coverFile);
-
       const supabase = createClient();
 
-      let iconUrl = null;
-      let coverUrl = null;
-
-      // アイコン画像のアップロード
-      if (newCommunity.iconFile) {
-        console.log("📤 アイコン画像アップロード開始...");
-        iconUrl = await uploadImage(newCommunity.iconFile, {
-          bucket: "community-images",
-          folder: "icons",
-        });
-        console.log("✅ アイコンアップロード結果:", iconUrl);
-      }
-
-      // カバー画像のアップロード
-      if (newCommunity.coverFile) {
-        console.log("📤 カバー画像アップロード開始...");
-        coverUrl = await uploadImage(newCommunity.coverFile, {
-          bucket: "community-images",
-          folder: "covers",
-        });
-        console.log("✅ カバーアップロード結果:", coverUrl);
-      }
-
-      // 1. コミュニティ作成（画像URL含む）
-      const communityData = {
-        name: newCommunity.name.trim(),
-        description: newCommunity.description.trim(),
+      const eventData = {
+        name: newEvent.name.trim(),
+        description: newEvent.description.trim(),
+        location: newEvent.location.trim(),
+        max_participants: newEvent.max_participants,
+        deadline: newEvent.deadline,
         owner_id: meId,
-        image_path: iconUrl || coverUrl,
       };
 
-      console.log("💾 データベース保存データ:", communityData);
-
-      const { data: community, error: communityError } = await supabase
-        .from("community")
-        .insert([communityData])
+      const { data: event, error: eventError } = await supabase
+        .from("events")
+        .insert([eventData])
         .select()
         .single();
 
-      if (communityError) {
-        console.error("❌ コミュニティ作成エラー:", communityError);
-        throw communityError;
-      }
+      if (eventError) throw eventError;
 
-      console.log("🎉 コミュニティ作成成功:", community);
+      const { data: eventMember, error: memberError } = await supabase
+        .from("event_members")
+        .insert([{ event_id: event.id, user_id: meId }])
+        .select()
+        .single();
 
-      // 2. 作成者を自動的にメンバーに追加
-      const { error: memberError } = await supabase
-        .from("community_members")
-        .insert([
-          {
-            community_id: community.id,
-            user_id: meId,
-          },
-        ]);
+      if (memberError) throw memberError;
 
-      if (memberError) {
-        console.error("❌ メンバー追加エラー:", memberError);
-        throw memberError;
-      }
+      const { data: candidate, error: dateError } = await supabase
+        .from("candidate_date")
+        .insert(
+          newEvent.candidate_dates.map((date) => ({
+            event_id: event.id,
+            candidate_date: date,
+          }))
+        )
+        .select("id");
 
-      // 3. Slackチャンネルを自動作成
-      let slackChannelCreated = false;
-      try {
-        await createSlackChannel(
-          community.id,
-          newCommunity.name.trim(),
-          newCommunity.description.trim(),
-          slackUserToken
+      if (dateError) {
+        console.error("候補日登録エラー:", dateError);
+      } else if (candidate) {
+        const { error: voteError } = await supabase.from("vote_date").insert(
+          candidate.map((row) => ({
+            event_member_id: eventMember.id,
+            candidate_id: row.id,
+            is_yes: true,
+          }))
         );
-        slackChannelCreated = true;
-      } catch (slackError) {
-        console.warn(
-          "⚠️ Slackチャンネル作成に失敗しましたが、コミュニティ作成は成功:",
-          slackError
-        );
+
+        if (voteError) console.error("参加可否登録エラー:", voteError);
       }
 
-      // 4. データ再取得とフォームリセット
-      await fetchCommunities();
-      await fetchUserCommunities(meId);
+      await fetchEvents();
+      await fetchUserEvents(meId);
 
-      setNewCommunity({
+      setNewEvent({
         name: "",
         description: "",
-        iconFile: null,
-        iconPreview: null,
-        coverFile: null,
-        coverPreview: null,
+        location: "",
+        deadline: null,
+        max_participants: null,
+        candidate_dates: [],
       });
 
       setShowCreateForm(false);
 
-      console.log("🚀 コミュニティ作成完了");
-
-      // 成功メッセージを表示
-      if (slackChannelCreated) {
-        alert(
-          `🎉 コミュニティ「${newCommunity.name.trim()}」が作成されました！\nSlackチャンネルも自動作成されました。`
-        );
-      } else {
-        alert(
-          `🎉 コミュニティ「${newCommunity.name.trim()}」が作成されました！\nSlackチャンネルの作成には失敗しましたが、後から手動で作成できます。`
-        );
-      }
-    } catch (e) {
-      console.error("❌ コミュニティ作成失敗:", e);
-      alert("コミュニティの作成に失敗しました: " + e.message);
+      alert(`🎉 イベント「${newEvent.name.trim()}」が作成されました！`);
+      router.push(`/events/${event.id}`);
+    } catch (e: any) {
+      alert("イベントの作成に失敗しました: " + e.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCommunityClick = (communityId: number) => {
-    router.push(`/communities/${communityId}`);
+  const handleEventClick = (eventId: number) => {
+    router.push(`/events/${eventId}`);
   };
 
-  const closeCreateForm = () => {
-    setNewCommunity({
-      name: "",
-      description: "",
-      iconFile: null,
-      iconPreview: null,
-      coverFile: null,
-      coverPreview: null,
-    });
-    setShowCreateForm(false);
-  };
-
-  const safeCommunities = (communities ?? []).filter(
-    (c): c is CommunityWithMembers => !!c && typeof c.id === "number"
+  const safeEvents = (events ?? []).filter(
+    (e): e is EventWithMembers => !!e && typeof e.id === "number"
   );
 
-  const myCommunities = safeCommunities.filter((c) =>
-    userCommunities.includes(c.id)
-  );
-  const otherCommunities = safeCommunities.filter(
-    (c) => !userCommunities.includes(c.id)
-  );
+  const myEvents = safeEvents.filter((e) => userEvents.includes(e.id));
+  const otherEvents = safeEvents.filter((e) => !userEvents.includes(e.id));
 
   const stats = {
-    totalCommunities: safeCommunities.length,
-    myCommunities: myCommunities.length,
-    otherCommunities: otherCommunities.length,
+    totalEvents: safeEvents.length,
+    myEvents: myEvents.length,
+    otherEvents: otherEvents.length,
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-xl text-gray-600">読み込み中．．．</div>
-        </div>
-      </div>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "grey.50",
+        }}
+      >
+        <Box textAlign="center">
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6" color="text.secondary">
+            読み込み中．．．
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "grey.50",
+        }}
+      >
+        <Paper sx={{ p: 4, textAlign: "center" }}>
+          <Typography color="error" variant="h6" gutterBottom>
             エラーが発生しました．
-          </div>
-          <div className="text-gray-600 mb-6">{error}</div>
-          <button
+          </Typography>
+          <Typography color="text.secondary" paragraph>
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => window.location.reload()}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
           >
             再読み込み
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Paper>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">イベント</h1>
-              <p className="text-gray-600 mt-2">
-                参加中: {stats.myCommunities}個 ／ 全体:{" "}
-                {stats.totalCommunities}個
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-            >
-              <span className="text-xl">+</span>
-              <span>新しいイベントを作成</span>
-            </button>
-          </div>
-        </div>
+    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
+      <Container maxWidth="lg">
+        <Box
+          mb={4}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Box>
+            <Typography variant="h4" fontWeight="bold" color="text.primary">
+              イベント
+            </Typography>
+            <Typography variant="body1" color="text.secondary" mt={1}>
+              参加中: {stats.myEvents}個 ／ 全体: {stats.totalEvents}個
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<span style={{ fontSize: "1.5rem" }}>＋</span>}
+            onClick={() => setShowCreateForm(true)}
+          >
+            新しいイベントを作成
+          </Button>
+        </Box>
 
         <EventList
-          myCommunities={myCommunities}
-          otherCommunities={otherCommunities}
-          onCommunityClick={handleCommunityClick}
+          myEvents={myEvents}
+          otherEvents={otherEvents}
+          onEventClick={handleEventClick}
         />
 
         <CreateEventModal
           show={showCreateForm}
-          newEvent={newCommunity}
-          onSubmit={createCommunity}
-          onClose={closeCreateForm}
-          onChange={setNewCommunity}
+          newEvent={newEvent}
+          onSubmit={createEvent}
+          onClose={() => setShowCreateForm(false)}
+          onChange={setNewEvent}
           isSubmitting={isSubmitting}
         />
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 }
