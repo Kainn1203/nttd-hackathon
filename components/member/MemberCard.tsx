@@ -32,6 +32,11 @@ interface MemberCardProps {
   onClick: () => void;
 }
 
+interface Diagnosis {
+  label: string;
+  image: string | null;
+}
+
 const getBackgroundColor = (score: number | null): string => {
   if (score === null) return "#ffffff"; // 白
   if (score <= 20) return "#FFF9FA"; // 赤系
@@ -50,7 +55,48 @@ const getBorderColor = (score: number | null): string => {
   return "#6A4FB6"; // 紫系
 };
 
+// スコアに応じた診断結果を返す関数
+function getDiagnosis(score: number | null): Diagnosis {
+  if (score === null) {
+    return { label: "診断結果がありません", image: null };
+  }
+  if (score <= 20) {
+    return {
+      label: "ゆるふわ KAIWAI",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+    };
+  }
+  if (score <= 40) {
+    return {
+      label: "今日、定時に恋しました。",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
+    };
+  }
+  if (score <= 60) {
+    return {
+      label: "タイパ重視",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
+    };
+  }
+  if (score <= 80) {
+    return {
+      label: "残業するのは、ダメですか？",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
+    };
+  }
+  return {
+    label: "残業が尊い….！",
+    image:
+      "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
+  };
+}
+
 const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
+  const diagnosis = getDiagnosis(member.scores);
   return (
     <Card
       onClick={onClick}
@@ -65,8 +111,27 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
         "&:hover": { boxShadow: 6 },
         backgroundColor: getBackgroundColor(member.scores),
         border: `2px solid ${getBorderColor(member.scores)}`,
+        position: "relative",
       }}
     >
+      {/* 左上に重ねて表示 */}
+      {member.diagnosis_result && (
+        <Box
+          component="img"
+          src={diagnosis.image}
+          alt={diagnosis.label}
+          sx={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            width: 40,
+            height: 40,
+            objectFit: "contain",
+            zIndex: 2,
+          }}
+        />
+      )}
+
       <CardContent sx={{ textAlign: "center", overflow: "hidden" }}>
         <Avatar
           src={member.image_path}

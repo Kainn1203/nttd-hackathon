@@ -85,7 +85,7 @@ export default async function MemberPage() {
   );
 
   return (
-    <Box sx={{ p: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", p: 6 }}>
       <Typography variant="h5" fontWeight="bold" mb={4}>
         内定者一覧
       </Typography>
@@ -95,6 +95,7 @@ export default async function MemberPage() {
         hobbies={hobbies}
         members={updatedMembers}
         university={me.university}
+        currentUserId={me.id}
       />
     </Box>
   );
