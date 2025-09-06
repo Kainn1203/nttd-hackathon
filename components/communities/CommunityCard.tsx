@@ -51,18 +51,22 @@ export default function CommunityCard({
   };
 
   // 先頭の関数内に追加（componentスコープでOK）
-  const initialLetter = (community.name ?? '').trim().charAt(0) || 'C';
+  const initialLetter = (community.name ?? "").trim().charAt(0) || "C";
 
   // Grid View （グリッド表示）
   if (viewMode === "grid") {
     return (
       <div
-        className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1 ${
+        className={`bg-white rounded-2xl shadow-sm hover:shadow-sm transition-all duration-200 cursor-pointer transform hover:-translate-y-1 ${
           isMember
             ? "border-2 border-blue-200 bg-blue-50/30"
             : "border border-gray-200"
         }`}
         onClick={handleCardClick}
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+        }}
       >
         <div className="pt-8 pb-6 px-6"></div>
         {/* ▼ 丸アイコン */}
@@ -134,7 +138,7 @@ export default function CommunityCard({
           </div>
 
           {/* Stats (統計情報部分)*/}
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-4 rounded-lg px-3 py-2">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <svg
@@ -160,10 +164,10 @@ export default function CommunityCard({
           </div>
 
           {/* Action Button - 詳細ボタンのみ */}
-          <div className="flex justify-center">
+          <div className="flex justify-center p-2">
             <button
               onClick={handleCardClick}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-2xl hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
             >
               詳細を見る
               <svg
@@ -189,7 +193,7 @@ export default function CommunityCard({
   // List View（リスト表示）
   return (
     <div
-      className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer ${
+      className={`bg-white rounded-2xl shadow-sm hover:shadow-sm transition-all duration-200 cursor-pointer ${
         isMember
           ? "border-l-4 border-blue-500 bg-blue-50/30"
           : "border-l-4 border-gray-300"

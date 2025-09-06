@@ -39,7 +39,7 @@ export default function CommunityDetail({ community, imageUrl, ownerName }: Prop
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Card
         variant="outlined"
-        sx={{ borderRadius: 3, border: "none" }}
+        sx={{ borderRadius: 3, border: "1px solid #bfdbfe", background: "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)", boxShadow: 2 }}
         className="dark:invert"
       >
         <CardHeader
