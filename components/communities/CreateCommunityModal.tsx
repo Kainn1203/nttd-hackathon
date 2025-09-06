@@ -123,7 +123,7 @@ export default function CreateCommunityModal({
               label="名称"
               value={newCommunity.name}
               onChange={handleNameChange}
-              placeholder="例：BBQ"
+              placeholder="例：Stray Kids好き集まれ！"
               required
               fullWidth
               variant="outlined"

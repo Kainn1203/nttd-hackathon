@@ -142,7 +142,7 @@ export default async function Home() {
 
       {/* お知らせ（1つの枠で縦スクロール表示） */}
       <Container maxWidth="lg" disableGutters sx={{ px: { xs: 0, sm: 3 }, mb: 2 }}>
-        <Alert icon={false} severity="info" variant="outlined" sx={{ borderRadius: 2, p: 0, overflow: 'hidden' }}>
+        <Alert icon={false} severity="info" variant="outlined" sx={{display: "block", borderRadius: 2, px: 2, overflow: 'hidden' }}>
           <Box className="notice-scroll" sx={{ maxHeight: 180, overflowY: 'auto', py: 1, position: 'relative' }}>
             {(eventAnnouncements ?? []).length > 0 ? (
               <Stack spacing={0}>
