@@ -130,27 +130,33 @@ export default function DiagnosisResults({
 
         {/* 線的要素 */}
         <div className="absolute top-10 left-10 w-60 h-0.5 bg-white/50 rotate-[20deg]"></div>
-        <div className="absolute top-20 left-20 w-100 h-0.5 bg-white/50 rotate-45"></div>
+        <div className="absolute top-20 left-20 w-[100px] h-0.5 bg-white/50 rotate-45"></div>
         <div className="absolute top-40 right-20 w-72 h-0.5 bg-white/50 -rotate-[15deg]"></div>
-        <div className="absolute bottom-60 left-1/3 w-40 h-0.5 bg-white/50 rotate-30"></div>
-
+        <div className="absolute bottom-60 left-1/3 w-40 h-0.5 bg-white/50 rotate-[30deg]"></div>
         {/* 幾何学的要素 */}
         <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-br from-sky-200/30 to-cyan-300/20 transform rotate-12 blur-lg border border-white/20"></div>
         <div className="absolute bottom-1/3 left-1/2 w-24 h-24 bg-gradient-to-tl from-purple-200/25 to-pink-200/20 transform -rotate-45 blur-md border border-white/15"></div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
-        {/* メインコンテナ */}
-        <div className="bg-gradient-to-br from-sky-300/60 via-purple-400/50 to-pink-500/60 backdrop-blur-xl rounded-3xl shadow-lg border border-white/25 p-10">
-          {/* ヘッダー */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-extralight text-white mb-6 tracking-wide drop-shadow-2xl">
+      {/* ▼▼ レスポンシブ対応版 ▼▼ */}
+      <div className="max-w-6xl mx-auto px-4 pt-20 pb-6 sm:pt-24 sm:pb-8 relative z-10">
+        {/* ヘッダー分の余白を追加 */}
+        <div className="bg-gradient-to-br from-sky-300/60 via-purple-400/50 to-pink-500/60 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg border border-white/25 p-4 sm:p-6">
+          {/* 旧: rounded-3xl p-10 */}
+
+          {/* ヘッダー（文字は見やすく太めのまま） */}
+          <div className="text-center mb-6 sm:mb-8">
+            {/* 旧: mb-12 */}
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-wide drop-shadow-2xl">
+              {/* 旧: text-5xl mb-6 */}
               診断結果
             </h1>
-            <p className="text-xl text-white/90 drop-shadow-lg">
+            <p className="text-base sm:text-lg font-semibold text-white/90 drop-shadow-lg">
+              {/* 旧: text-xl */}
               {userName}さんの社畜診断が完了しました！
             </p>
-            <p className="text-white/90 font-semibold mt-3 drop-shadow">
+            <p className="text-sm sm:text-base text-white/90 font-semibold mt-2 drop-shadow">
+              {/* 旧: mt-3 */}
               診断日時: {new Date(result.createdAt).toLocaleString("ja-JP")}
             </p>
           </div>
@@ -180,17 +186,18 @@ export default function DiagnosisResults({
                   unoptimized
                 />
               </div>
-
-              {/* 装飾的なアクセント - より大きく */}
               <div
-                className={`absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-r ${config.color} rounded-full shadow-xl opacity-90`}
+                className={`absolute -top-3 -right-3 sm:-top-5 sm:-right-5 w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-r ${config.color} rounded-full shadow-xl opacity-90`}
               ></div>
+              {/* 旧: w-16 h-16 */}
               <div
-                className={`absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-r ${config.color} rounded-full shadow-lg opacity-70`}
+                className={`absolute -bottom-3 -left-3 sm:-bottom-5 sm:-left-5 w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r ${config.color} rounded-full shadow-lg opacity-70`}
               ></div>
+              {/* 旧: w-12 h-12 */}
               <div
-                className={`absolute top-12 -left-8 w-10 h-10 bg-gradient-to-r ${config.color} rounded-full shadow-lg opacity-50`}
+                className={`absolute top-8 -left-5 sm:top-10 sm:-left-7 w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r ${config.color} rounded-full shadow-lg opacity-50`}
               ></div>
+              {/* 旧: w-10 h-10 */}
             </div>
           </div>
 
@@ -261,47 +268,44 @@ export default function DiagnosisResults({
             </div>
           </div>
 
-          {/* 詳細分析セクション */}
-          <div className="bg-gradient-to-r from-white/15 via-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 mb-10 border border-white/30">
-            <h3 className="text-3xl font-semibold text-white/90 mb-6 drop-shadow-lg">
+          {/* 詳細分析セクション（外観はそのまま） */}
+          <div className="bg-gradient-to-r from-white/15 via-white/10 to-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-white/30">
+            {/* 旧: mb-10 */}
+            <h3 className="text-2xl sm:text-3xl font-semibold text-white/90 mb-4 sm:mb-6 drop-shadow-lg">
               📋 詳細分析
             </h3>
-
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-cyan-200/10 via-cyan-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-cyan-300/20">
-                <div className="text-sky-100 text-xl font-semibold mb-3 drop-shadow">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-gradient-to-br from-cyan-200/10 via-cyan-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-cyan-300/20">
+                <div className="text-sky-100 text-lg sm:text-xl font-semibold mb-2 sm:mb-3 drop-shadow">
                   特徴
                 </div>
-                <div className="text-white/90 font-semibold leading-relaxed drop-shadow">
+                <div className="text-sm sm:text-base text-white/90 font-semibold leading-relaxed drop-shadow">
                   {config.details.characteristic}
                 </div>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-green-200/10 via-green-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-green-300/20">
-                  <div className="text-cyan-100 text-xl font-semibold mb-3 drop-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="bg-gradient-to-br from-green-200/10 via-green-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-green-300/20">
+                  <div className="text-cyan-100 text-lg sm:text-xl font-semibold mb-2 sm:mb-3 drop-shadow">
                     強み
                   </div>
-                  <div className="text-white/90 font-semibold leading-relaxed drop-shadow">
+                  <div className="text-sm sm:text-base text-white/90 font-semibold leading-relaxed drop-shadow">
                     {config.details.strengths}
                   </div>
                 </div>
-
-                <div className="bg-gradient-to-br from-yellow-200/10 via-yellow-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-yellow-300/20">
-                  <div className="text-white/90 text-xl font-semibold mb-3 drop-shadow">
+                <div className="bg-gradient-to-br from-yellow-200/10 via-yellow-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-yellow-300/20">
+                  <div className="text-white/90 text-lg sm:text-xl font-semibold mb-2 sm:mb-3 drop-shadow">
                     弱み
                   </div>
-                  <div className="text-white/90 font-semibold leading-relaxed drop-shadow">
+                  <div className="text-sm sm:text-base text-white/90 font-semibold leading-relaxed drop-shadow">
                     {config.details.weaknesses}
                   </div>
                 </div>
               </div>
-
-              <div className="bg-gradient-to-br from-purple-200/10 via-purple-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-purple-300/20">
-                <div className="text-purple-100 text-xl font-semibold mb-3 drop-shadow">
+              <div className="bg-gradient-to-br from-purple-200/10 via-purple-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-purple-300/20">
+                <div className="text-purple-100 text-lg sm:text-xl font-semibold mb-2 sm:mb-3 drop-shadow">
                   アドバイス
                 </div>
-                <div className="text-white/90 font-semibold leading-relaxed drop-shadow">
+                <div className="text-sm sm:text-base text-white/90 font-semibold leading-relaxed drop-shadow">
                   {config.details.advice}
                 </div>
               </div>
@@ -309,33 +313,33 @@ export default function DiagnosisResults({
           </div>
 
           {/* 詳細レポート */}
-          <div className="bg-gradient-to-r from-white/15 via-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 mb-10 border border-white/30">
-            <h3 className="text-2xl font-semibold text-white/90 mb-6 drop-shadow-lg">
+          <div className="bg-gradient-to-r from-white/15 via-white/10 to-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-white/30">
+            {/* 旧: mb-10 */}
+            <h3 className="text-xl sm:text-2xl font-semibold text-white/90 mb-4 sm:mb-6 drop-shadow-lg">
               📊 診断データ
             </h3>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-cyan-200/10 via-cyan-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-cyan-300/20">
-                <div className="text-cyan-200 text-sm font-semibold mb-2 drop-shadow">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-br from-cyan-200/10 via-cyan-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-cyan-300/20">
+                <div className="text-cyan-200 text-xs sm:text-sm font-semibold mb-1 sm:mb-2 drop-shadow">
                   タイプ
                 </div>
-                <div className="text-white/90 text-lg font-semibold drop-shadow">
+                <div className="text-white/90 text-base sm:text-lg font-semibold drop-shadow">
                   {result.type.name}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-purple-200/10 via-purple-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-purple-300/20">
-                <div className="text-purple-200 text-sm font-semibold mb-2 drop-shadow">
+              <div className="bg-gradient-to-br from-purple-200/10 via-purple-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-purple-300/20">
+                <div className="text-purple-200 text-xs sm:text-sm font-semibold mb-1 sm:mb-2 drop-shadow">
                   スコア
                 </div>
-                <div className="text-white/90 text-lg font-semibold drop-shadow">
+                <div className="text-white/90 text-base sm:text-lg font-semibold drop-shadow">
                   {result.scores}点 / 100点
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-pink-200/10 via-pink-100/5 to-white/5 backdrop-blur-sm rounded-xl p-6 border border-pink-300/20">
-                <div className="text-pink-200 text-sm font-semibold mb-2 drop-shadow">
+              <div className="bg-gradient-to-br from-pink-200/10 via-pink-100/5 to-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-pink-300/20">
+                <div className="text-pink-200 text-xs sm:text-sm font-semibold mb-1 sm:mb-2 drop-shadow">
                   診断日
                 </div>
-                <div className="text-white/90 text-lg font-semibold drop-shadow">
+                <div className="text-white/90 text-base sm:text-lg font-semibold drop-shadow">
                   {new Date(result.createdAt).toLocaleDateString("ja-JP")}
                 </div>
               </div>
@@ -343,10 +347,10 @@ export default function DiagnosisResults({
           </div>
 
           {/* アクションボタン */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <button
               onClick={onRestart}
-              className="w-full bg-gradient-to-r from-cyan-500/80 to-purple-600/80 backdrop-blur-2xl hover:from-cyan-400/90 hover:to-purple-500/90 border border-cyan-400/50 text-white font-medium py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 hover:-translate-y-1 drop-shadow-lg"
+              className="w-full bg-gradient-to-r from-cyan-500/80 to-purple-600/80 backdrop-blur-2xl hover:from-cyan-400/90 hover:to-purple-500/90 border border-cyan-400/50 text-white font-medium py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 hover:-translate-y-1 drop-shadow-lg text-sm sm:text-base"
             >
               🔄 もう一度診断
             </button>
