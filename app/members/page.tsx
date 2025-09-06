@@ -87,7 +87,7 @@ export default async function MemberPage() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", p: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "transparent", p: 6 }}>
       <Typography variant="h5" fontWeight="bold" mb={4}>
         内定者一覧
       </Typography>

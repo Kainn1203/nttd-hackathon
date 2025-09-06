@@ -97,15 +97,19 @@ export default function HobbyFilter({
       {/* 検索バー + フィルターメニュー */}
       <AppBar
         position="static"
-        color="default"
-        elevation={1}
+        color="transparent"
+        elevation={0}
         sx={{
           mb: 3,
           p: 3,
-          bgcolor: "white", // 背景色を白に
-          borderRadius: 2, // 角を少し丸く
-          width: "fit-content", // 必要に応じて幅調整（全幅を避けたい場合）
-          mx: "auto", // 中央寄せ（任意）
+          bgcolor: "transparent",
+          borderRadius: 2,
+          width: "fit-content",
+          mx: "auto",
+          boxShadow: "none",
+          border: '1px solid',
+          borderColor: 'divider',
+          backdropFilter: 'saturate(120%) blur(2px)',
         }}
       >
         <Toolbar sx={{ flexDirection: "column", alignItems: "flex-start" }}>

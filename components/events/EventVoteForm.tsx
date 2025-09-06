@@ -125,7 +125,9 @@ export default function EventVoteForm({
   };
 
   return (
-    <Card>
+    <Card sx={{
+      background: 'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)'
+    }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           候補日に投票
