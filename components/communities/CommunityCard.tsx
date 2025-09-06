@@ -44,6 +44,9 @@ export default function CommunityCard({  //上で定義したpropsを受け取�
     return text.substring(0, maxLength) + '...';
   };
 
+  // 先頭の関数内に追加（componentスコープでOK）
+  const initialLetter = (community.name ?? '').trim().charAt(0) || 'C';
+
   // Grid View （グリッド表示）
   if (viewMode === 'grid') {
     return (
@@ -53,6 +56,24 @@ export default function CommunityCard({  //上で定義したpropsを受け取�
         }`} 
         onClick={handleCardClick}
       >
+        <div className="pt-8 pb-6 px-6"></div>
+        {/* ▼ 丸アイコン */}
+        <div className="flex justify-center mb-4">
+          <div className="w-40 h-40 md:w-44 md:h-44 rounded-full overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
+            {community.image_path ? (
+              <img
+                src={community.image_path}
+                alt={`${community.name} のアイコン`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <span className="text-gray-400 text-xl font-semibold select-none">
+                {initialLetter}
+              </span>
+            )}
+          </div>
+        </div>
         <div className="p-6">
           {/* Header (ヘッダー部分)*/} 
           <div className="flex items-start justify-between mb-3">
