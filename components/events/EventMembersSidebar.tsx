@@ -29,12 +29,9 @@ export default function EventMembersSidebar({
       sx={{
         p: 2,
         borderRadius: 3,
-        position: { md: "sticky" }, // md以上で右カラムを固定
-        top: { md: 16 }, // ヘッダ等があれば微調整
         display: "flex",
         flexDirection: "column",
-        // 画面高にフィットして内部スクロール
-        maxHeight: { xs: "none", md: "calc(100vh - 32px)" },
+        maxHeight: { xs: "none", md: "600px" },
         background:
           'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)',
       }}
