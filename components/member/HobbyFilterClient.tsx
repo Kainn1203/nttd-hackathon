@@ -124,7 +124,7 @@ export default function HobbyFilter({
           <Typography variant="subtitle1" fontWeight="bold">
             趣味で絞り込み
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
             {hobbies.map((h) => (
               <Button
                 key={h.id}
