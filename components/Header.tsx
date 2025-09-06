@@ -17,12 +17,14 @@ import {
   ListItemText,
   Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import GroupsIcon from "@mui/icons-material/Groups";
-import ForumIcon from "@mui/icons-material/Forum";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import EventIcon from "@mui/icons-material/Event";
-import PersonIcon from "@mui/icons-material/Person";
+import {
+  Menu as MenuIcon,
+  Groups as GroupsIcon,
+  Forum as ForumIcon,
+  Psychology as PsychologyIcon,
+  Event as EventIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 
 const nav = [
   { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
@@ -35,8 +37,6 @@ const nav = [
 export default function Header() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname() ?? "/";
-  // 絶対パスで遷移
-  const ichiranHref = "/members";
 
   return (
     <AppBar
@@ -57,10 +57,10 @@ export default function Header() {
               fontWeight: 800,
               fontSize: { xs: 16, sm: 18 },
               mr: 1.5,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxWidth: { xs: '60%', md: 'none' },
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: { xs: "60%", md: "none" },
             }}
             noWrap
           >
@@ -79,17 +79,21 @@ export default function Header() {
               }}
             >
               {nav.map((n) => {
-                const targetHref = n.label === "内定者一覧" ? ichiranHref : n.href;
-                const isActive = pathname === n.href || pathname.startsWith(`${n.href}/`);
+                const isActive =
+                  pathname === n.href || pathname.startsWith(`${n.href}/`);
                 return (
                   <Button
                     key={n.href}
                     component={Link}
-                    href={targetHref}
+                    href={n.href}
                     startIcon={
                       <Box
                         className="nav-icon"
-                        sx={{ display: 'inline-flex', transition: 'transform .2s ease', transformOrigin: 'center' }}
+                        sx={{
+                          display: "inline-flex",
+                          transition: "transform .2s ease",
+                          transformOrigin: "center",
+                        }}
                       >
                         {n.icon}
                       </Box>
@@ -103,13 +107,15 @@ export default function Header() {
                       justifyContent: "center",
                       fontWeight: 700,
                       borderRadius: 1,
-                      whiteSpace: 'nowrap',
+                      whiteSpace: "nowrap",
                       px: 2,
-                      backgroundColor: isActive ? "action.selected" : "transparent",
+                      backgroundColor: isActive
+                        ? "action.selected"
+                        : "transparent",
                       "&:hover": {
                         backgroundColor: "action.hover",
                       },
-                      "&:hover .nav-icon": { transform: 'scale(1.12)' },
+                      "&:hover .nav-icon": { transform: "scale(1.12)" },
                     }}
                   >
                     {n.label}

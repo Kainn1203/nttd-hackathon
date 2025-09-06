@@ -16,14 +16,14 @@ interface DiagnosisClientWrapperProps {
 export default function DiagnosisClientWrapper({ userId, userName }: DiagnosisClientWrapperProps) {
   const [currentStep, setCurrentStep] = useState<DiagnosisStep>('start')
   const [currentUserName, setCurrentUserName] = useState(userName)
-  const [diagnosisResult, setDiagnosisResult] = useState(null)
+  const [diagnosisResult, setDiagnosisResult] = useState<{ result: { id: number; userId: number; scores: number; type: { key: string; name: string }; createdAt: string } } | null>(null)
 
   const handleStart = (displayName: string) => {
     setCurrentUserName(displayName)
     setCurrentStep('form')
   }
 
-  const handleComplete = (result: any) => {
+  const handleComplete = (result: { result: { id: number; userId: number; scores: number; type: { key: string; name: string }; createdAt: string } }) => {
     setDiagnosisResult(result)
     setCurrentStep('results')
   }
@@ -65,7 +65,7 @@ export default function DiagnosisClientWrapper({ userId, userName }: DiagnosisCl
       return (
         <DiagnosisResults
           userName={currentUserName}
-          result={(diagnosisResult as any).result}
+          result={diagnosisResult.result}
           onRestart={handleRestart}
         />
       )

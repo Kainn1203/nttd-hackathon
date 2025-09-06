@@ -19,10 +19,12 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
-import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
-import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import {
+  BadgeRounded as BadgeRoundedIcon,
+  KeyRounded as KeyRoundedIcon,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 export default function LoginPage() {
   const router = useRouter();

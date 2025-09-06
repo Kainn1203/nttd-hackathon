@@ -48,6 +48,23 @@ export default async function Community(props: {
     return notFound();
   }
 
+  // 作成者の情報を取得
+  let ownerName = "不明";
+  if (data.owner_id) {
+    const { data: ownerData } = await supabase
+      .from("user")
+      .select("last_name, first_name")
+      .eq("id", data.owner_id)
+      .maybeSingle();
+    
+    if (ownerData) {
+      const ln = ownerData.last_name?.trim() ?? "";
+      const fn = ownerData.first_name?.trim() ?? "";
+      const fullName = `${ln} ${fn}`.trim();
+      ownerName = fullName || `不明`;
+    }
+  }
+
   const channelId = data.slack_channel_id;
   const cookieStore = await cookies();
   const hasSlackAuth = !!cookieStore.get("slack_user_token")?.value;
@@ -95,7 +112,7 @@ export default async function Community(props: {
       return {
         id: u.id,
         name: toDisplayName(u),
-        imageUrl,
+        imageUrl: u.image_path || undefined,
       } as MemberView;
     })
   );
@@ -114,13 +131,17 @@ export default async function Community(props: {
       >
         {/* 左カラム */}
         <Stack spacing={2}>
-          <CommunityDetail community={data} imageUrl={imageUrl} />
+          <CommunityDetail
+            community={data}
+            imageUrl={data.image_path || undefined}
+            ownerName={ownerName}
+          />
           {isMember ? (
             hasSlackAuth ? (
               channelId ? (
                 <SlackChat channelId={channelId} />
               ) : (
-                <SlackChannelSetup 
+                <SlackChannelSetup
                   communityId={num}
                   communityName={data.name}
                   isOwner={data.owner_id === meId}

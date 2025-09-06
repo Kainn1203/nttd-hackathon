@@ -46,7 +46,7 @@ const useCommunities = () => {
       if (error) throw error;
 
       const communitiesWithCount =
-        data?.map((c: any) => ({
+        data?.map((c) => ({
           ...c,
           member_count: Array.isArray(c.community_members)
             ? c.community_members.length
@@ -184,8 +184,6 @@ export default function CommunitiesClient({
     error,
     fetchCommunities,
     fetchUserCommunities,
-    setCommunities,
-    setUserCommunities,
     setLoading,
   } = useCommunities();
 
@@ -196,6 +194,7 @@ export default function CommunitiesClient({
     } else {
       if (loading) setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meId]);
 
   const createCommunity = async (e: React.FormEvent) => {
@@ -307,7 +306,7 @@ export default function CommunitiesClient({
       
     } catch (e) {
       console.error('❌ コミュニティ作成失敗:', e);
-      alert('コミュニティの作成に失敗しました: ' + e.message);
+      alert('コミュニティの作成に失敗しました: ' + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsSubmitting(false);
     }

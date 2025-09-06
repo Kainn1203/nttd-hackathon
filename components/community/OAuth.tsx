@@ -11,7 +11,7 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { Refresh as RefreshIcon } from "@mui/icons-material";
 import { SiSlack } from "react-icons/si";
 
 export default function OAuth() {

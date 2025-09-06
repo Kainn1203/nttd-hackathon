@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 interface DiagnosisFormProps {
   userName: string
   userId: number
-  onComplete: (result: any) => void
+  onComplete: (result: { result: { id: number; userId: number; scores: number; type: { key: string; name: string }; createdAt: string } }) => void
   onBack: () => void
 }
 
@@ -13,7 +13,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<{[key: number]: 1|2|3}>({})
   const [loading, setLoading] = useState(false)
-  const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([])
+  const [shuffledQuestions, setShuffledQuestions] = useState<{ id: number; text: string; options: { text: string; value: 1 | 2 | 3 }[] }[]>([])
 
   // Fisher-Yates シャッフルアルゴリズム
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -126,6 +126,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
       options: shuffleArray(question.options)
     }))
     setShuffledQuestions(questionsWithShuffledOptions)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAnswer = async (questionIndex: number, answerValue: 1|2|3) => {
@@ -163,14 +164,12 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
 
       const result = await response.json()
       onComplete({
-        userName,
-        result,
-        answers: allAnswers
+        result
       })
       
     } catch (error) {
       console.error('診断完了処理エラー:', error)
-      alert(`診断結果の保存に失敗しました: ${error.message}`)
+      alert(`診断結果の保存に失敗しました: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setLoading(false)
     }

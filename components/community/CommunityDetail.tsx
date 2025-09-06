@@ -18,10 +18,22 @@ import { Grid } from "@mui/material";
 type Props = {
   community: Community;
   imageUrl?: string | null;
+  ownerName?: string;
 };
 
-export default function CommunityDetail({ community, imageUrl }: Props) {
+export default function CommunityDetail({ community, imageUrl, ownerName }: Props) {
   const c = community;
+
+  // 日付をフォーマット（時間を除いて日付のみ表示）
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
@@ -101,8 +113,8 @@ export default function CommunityDetail({ community, imageUrl }: Props) {
 
                 <Divider sx={{ my: 1.5 }} />
 
-                <Field label="作成者ID">{c.owner_id ?? "-"}</Field>
-                <Field label="作成">{c.created_at ?? "-"}</Field>
+                <Field label="作成者">{ownerName ?? "-"}</Field>
+                <Field label="作成日">{formatDate(c.created_at)}</Field>
               </Stack>
             </Grid>
           </Grid>

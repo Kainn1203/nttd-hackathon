@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
+import Image from 'next/image'
 
 interface DiagnosisResultsProps {
   userName: string
@@ -18,7 +19,6 @@ interface DiagnosisResultsProps {
 }
 
 export default function DiagnosisResults({ userName, result, onRestart }: DiagnosisResultsProps) {
-  const [shareText, setShareText] = useState('')
   
   // タイプに応じた表示設定（画像パスを更新）
   const typeConfig = {
@@ -141,11 +141,13 @@ export default function DiagnosisResults({ userName, result, onRestart }: Diagno
               
               {/* メイン画像コンテナ */}
               <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border-2 border-white/60">
-                <img
+                <Image
                   src={config.imagePath}
                   alt={result.type.name}
+                  width={965}
+                  height={544}
                   className="block rounded-3xl shadow-none object-contain w-full h-auto max-w-5xl mx-auto"
-                  style={{ aspectRatio: '965/544' }}
+                  priority
                 />
               </div>
               

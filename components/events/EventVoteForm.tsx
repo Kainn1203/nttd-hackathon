@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Stack,
-  Chip,
   Alert,
   CircularProgress,
 } from "@mui/material";
@@ -17,7 +16,6 @@ import type {
   Event,
   CandidateDate,
   VoteDate,
-  EventMember,
 } from "@/types/event";
 import type { Me } from "@/types/me";
 

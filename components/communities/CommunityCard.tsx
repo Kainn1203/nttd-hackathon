@@ -23,7 +23,6 @@ export default function CommunityCard({  //上で定義したpropsを受け取�
   viewMode,
   onCommunityClick,
 }: CommunityCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
 
   const handleCardClick = () => { //カード全体がクリックされた時の処理

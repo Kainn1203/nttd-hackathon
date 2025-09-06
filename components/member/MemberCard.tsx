@@ -104,7 +104,8 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
         p: 2,
         borderRadius: 3,
         boxShadow: 1,
-        width: 320,
+        width: "100%",
+        maxWidth: 320,
         height: 336,
         cursor: "pointer",
         transition: "0.2s",
@@ -115,7 +116,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
       }}
     >
       {/* 左上に重ねて表示 */}
-      {member.diagnosis_result && (
+      {member.diagnosis_result && diagnosis.image && (
         <Box
           component="img"
           src={diagnosis.image}
@@ -134,7 +135,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
 
       <CardContent sx={{ textAlign: "center", overflow: "hidden" }}>
         <Avatar
-          src={member.image_path}
+          src={member.image_path || undefined}
           sx={{
             width: 96,
             height: 96,

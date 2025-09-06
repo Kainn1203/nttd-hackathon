@@ -48,6 +48,7 @@ export default function AnnouncementList({ eventId }: AnnouncementListProps) {
 
   useEffect(() => {
     fetchAnnouncements();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function AnnouncementList({ eventId }: AnnouncementListProps) {
         handleAnnouncementCreated
       );
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDateTime = (dateString: string) => {

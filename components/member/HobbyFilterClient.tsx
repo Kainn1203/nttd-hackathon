@@ -3,10 +3,10 @@ import { useState, useMemo } from "react";
 import {
   AppBar,
   Toolbar,
-  Grid,
   Button,
   Typography,
   TextField,
+  Box,
 } from "@mui/material";
 import MembersIndex from "./MemberIndex";
 
@@ -102,10 +102,9 @@ export default function HobbyFilter({
         sx={{
           mb: 3,
           p: 3,
-          bgcolor: "white", // 背景色を白に
-          borderRadius: 2, // 角を少し丸く
-          width: "fit-content", // 必要に応じて幅調整（全幅を避けたい場合）
-          mx: "auto", // 中央寄せ（任意）
+          bgcolor: "white",
+          borderRadius: 2,
+          width: "100%",
         }}
       >
         <Toolbar sx={{ flexDirection: "column", alignItems: "flex-start" }}>
@@ -125,20 +124,19 @@ export default function HobbyFilter({
           <Typography variant="subtitle1" fontWeight="bold">
             趣味で絞り込み
           </Typography>
-          <Grid container spacing={1} sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             {hobbies.map((h) => (
-              <Grid item key={h.id}>
-                <Button
-                  variant={
-                    selectedHobbyIds.includes(h.id) ? "contained" : "outlined"
-                  }
-                  onClick={() => toggleHobby(h.id)}
-                >
-                  #{h.hobby}
-                </Button>
-              </Grid>
+              <Button
+                key={h.id}
+                variant={
+                  selectedHobbyIds.includes(h.id) ? "contained" : "outlined"
+                }
+                onClick={() => toggleHobby(h.id)}
+              >
+                #{h.hobby}
+              </Button>
             ))}
-          </Grid>
+          </Box>
 
           <Typography variant="subtitle1" fontWeight="bold">
             大学で絞り込み
