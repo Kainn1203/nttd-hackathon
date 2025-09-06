@@ -4,20 +4,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Alert, AlertTitle, Box, Typography } from "@mui/material";
-import { getPublicImageUrl } from "@/lib/supabase/image";
 import ProfileFormWrapper from "@/components/mypage/ProfileFormWrapper";
 
 export default async function MyPage() {
   const me = await getMe();
   if (!me) redirect("/login");
-
-  // image_path がフルURLの場合はそのまま、パスのみなら公開URLに変換
-  let processedMe = { ...me };
-  if (me.imagePath) {
-    processedMe.imagePath = me.imagePath.startsWith("http")
-      ? me.imagePath
-      : getPublicImageUrl("user-images", me.imagePath) ?? undefined;
-  }
 
   // 趣味マスタ取得
   const supabase = await createClient();
@@ -61,13 +52,9 @@ export default async function MyPage() {
   return (
     <Box sx={{ p: 6 }}>
       <Typography variant="h3" fontWeight="bold" mb={4} align="center">
-        プロフィール登録
+        プロフィール登録・編集
       </Typography>
-      <ProfileFormWrapper 
-        me={processedMe} 
-        hobbyOptions={hobby} 
-        userHobby={userHobby} 
-      />
+      <ProfileFormWrapper me={me} hobbyOptions={hobby} userHobby={userHobby} />
     </Box>
   );
 }

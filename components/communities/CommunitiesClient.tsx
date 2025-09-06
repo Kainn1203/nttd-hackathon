@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 
 import CommunityList from '@/components/communities/CommunityList';
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
-import { uploadImage } from '@/lib/supabase/image'; // ← 追加
+import { uploadImage } from '@/lib/supabase/image';
 
 import type { Community } from '@/types/community';
 
@@ -34,32 +34,30 @@ const useCommunities = () => {
   const supabase = createClient();
 
   const fetchCommunities = async () => {
-    setLoading(true); // 「読み込み中」にする
+    setLoading(true);
     try {
-      setError(null); // エラーをリセット
+      setError(null);
 
-      // データベースからコミュニティ情報を取得
       const { data, error } = await supabase
-        .from('community') // 'community'というテーブルから
-        .select(`*, community_members(count)`) // 全ての項目 + メンバー数
-        .order('created_at', { ascending: false }); // 新しい順に並べる
+        .from('community')
+        .select(`*, community_members(count)`)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error; // エラーがあれば止まる
+      if (error) throw error;
 
-      // データを整理する
       const communitiesWithCount =
         data?.map((c: any) => ({
-          ...c, // 元のデータをそのまま
+          ...c,
           member_count: Array.isArray(c.community_members)
             ? c.community_members.length
-            : (c.community_members?.count ?? 0), // メンバー数を追加
+            : (c.community_members?.count ?? 0),
         })) ?? [];
-      setCommunities(communitiesWithCount); // 状態を更新
+      setCommunities(communitiesWithCount);
     } catch (e) {
       console.error('コミュニティ取得エラー:', e);
       setError('コミュニティの取得に失敗しました');
     } finally {
-    setLoading(false); // 必ず「読み込み完了」にする
+      setLoading(false);
     }
   };
 
@@ -93,11 +91,81 @@ const useCommunities = () => {
   };
 };
 
-export default function CommunitiesMain({ meId }: { meId: number }) {
+// Slackチャンネル作成関数
+async function createSlackChannel(
+  communityId: number, 
+  communityName: string, 
+  communityDescription: string,
+  slackUserToken: string | undefined
+) {
+  try {
+    console.log("🚀 Slackチャンネル作成開始:", { communityId, communityName, communityDescription });
+
+    // 1. Slack認証トークンの確認
+    if (!slackUserToken) {
+      console.log("📝 Slack認証トークンがありません");
+      console.log("💡 Slack認証が必要です。まずSlack認証を完了してください。");
+      return; // Slack認証がない場合は何もしない
+    }
+
+    console.log("🔑 Slack認証トークン取得完了:", slackUserToken.substring(0, 10) + "...");
+
+    // 2. Slackチャンネル作成APIを呼び出し
+    console.log("📡 Slackチャンネル作成API呼び出し開始");
+    const response = await fetch('/api/slack/channel/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        name: communityName, 
+        description: communityDescription 
+      }),
+    });
+
+    console.log("📡 APIレスポンス:", { status: response.status, statusText: response.statusText });
+
+    const data = await response.json();
+    console.log("📡 Slackチャンネル作成APIレスポンス:", { status: response.status, data });
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Slackチャンネル作成に失敗しました');
+    }
+
+    console.log("✅ Slackチャンネル作成成功:", data.channel);
+
+    // 3. 作成したチャンネルIDをDBに保存
+    console.log("💾 チャンネルID保存開始:", data.channel.id);
+    const updateResponse = await fetch(`/api/community/${communityId}/slack-channel`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slack_channel_id: data.channel.id }),
+    });
+
+    console.log("💾 保存APIレスポンス:", { status: updateResponse.status, statusText: updateResponse.statusText });
+
+    if (!updateResponse.ok) {
+      const updateErrorData = await updateResponse.json().catch(() => ({ error: 'レスポンスの解析に失敗' }));
+      throw new Error(`チャンネルIDの保存に失敗しました: ${updateResponse.status} - ${updateErrorData.error || updateResponse.statusText}`);
+    }
+
+    console.log("💾 SlackチャンネルID保存成功:", data.channel.id);
+    return data.channel;
+
+  } catch (error) {
+    console.error("❌ Slackチャンネル作成エラー:", error);
+    throw error;
+  }
+}
+
+export default function CommunitiesClient({ 
+  meId, 
+  slackUserToken 
+}: { 
+  meId: number;
+  slackUserToken?: string;
+}) {
   const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
   
-  // ★ 初期値に画像プロパティを追加
   const [newCommunity, setNewCommunity] = useState<NewCommunityForm>({ 
     name: '', 
     description: '',
@@ -130,7 +198,6 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
     }
   }, [meId]);
 
-  // ★ 画像アップロード対応版のcreateeCommunity関数
   const createCommunity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (meId == null || !newCommunity.name.trim() || isSubmitting) return;
@@ -151,7 +218,7 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
       if (newCommunity.iconFile) {
         console.log("📤 アイコン画像アップロード開始...");
         iconUrl = await uploadImage(newCommunity.iconFile, {
-          bucket: 'community-images', // 既存のバケットを使用
+          bucket: 'community-images',
           folder: 'icons'
         });
         console.log("✅ アイコンアップロード結果:", iconUrl);
@@ -161,7 +228,7 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
       if (newCommunity.coverFile) {
         console.log("📤 カバー画像アップロード開始...");
         coverUrl = await uploadImage(newCommunity.coverFile, {
-          bucket: 'community-images', // 既存のバケットを使用
+          bucket: 'community-images',
           folder: 'covers'
         });
         console.log("✅ カバーアップロード結果:", coverUrl);
@@ -172,10 +239,7 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
         name: newCommunity.name.trim(),
         description: newCommunity.description.trim(),
         owner_id: meId,
-        image_path: iconUrl || coverUrl, // アイコンを優先、なければカバー画像
-        // 分けて保存する場合は以下のように
-        // icon_url: iconUrl,
-        // cover_url: coverUrl,
+        image_path: iconUrl || coverUrl,
       };
 
       console.log("💾 データベース保存データ:", communityData);
@@ -208,11 +272,19 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
         throw memberError;
       }
 
-      // 3. データ再取得とフォームリセット
+      // 3. Slackチャンネルを自動作成
+      let slackChannelCreated = false;
+      try {
+        await createSlackChannel(community.id, newCommunity.name.trim(), newCommunity.description.trim(), slackUserToken);
+        slackChannelCreated = true;
+      } catch (slackError) {
+        console.warn("⚠️ Slackチャンネル作成に失敗しましたが、コミュニティ作成は成功:", slackError);
+      }
+
+      // 4. データ再取得とフォームリセット
       await fetchCommunities();
       await fetchUserCommunities(meId);
       
-      // ★ 画像プロパティも含めてリセット
       setNewCommunity({ 
         name: '', 
         description: '',
@@ -225,6 +297,13 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
       setShowCreateForm(false);
       
       console.log("🚀 コミュニティ作成完了");
+      
+      // 成功メッセージを表示
+      if (slackChannelCreated) {
+        alert(`🎉 コミュニティ「${newCommunity.name.trim()}」が作成されました！\nSlackチャンネルも自動作成されました。`);
+      } else {
+        alert(`🎉 コミュニティ「${newCommunity.name.trim()}」が作成されました！\nSlackチャンネルの作成には失敗しましたが、後から手動で作成できます。`);
+      }
       
     } catch (e) {
       console.error('❌ コミュニティ作成失敗:', e);
@@ -239,7 +318,6 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
   };
 
   const closeCreateForm = () => {
-    // ★ 画像プロパティも含めてリセット
     setNewCommunity({ 
       name: '', 
       description: '',
@@ -251,7 +329,6 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
     setShowCreateForm(false);
   };
 
-  // 以下、既存のコードそのまま（UI部分）
   const safeCommunities = (communities ?? []).filter(
     (c): c is CommunityWithMembers => !!c && typeof c.id === 'number'
   );
@@ -324,7 +401,7 @@ export default function CommunitiesMain({ meId }: { meId: number }) {
         <CreateCommunityModal
           show={showCreateForm}
           newCommunity={newCommunity}
-          onSubmit={createCommunity} // ← 修正版のcreateeCommunity
+          onSubmit={createCommunity}
           onClose={closeCreateForm}
           onChange={setNewCommunity}
           isSubmitting={isSubmitting}

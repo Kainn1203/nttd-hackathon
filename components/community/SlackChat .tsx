@@ -55,6 +55,8 @@ export default function SlackChat({ channelId }: SlackChatProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(
     async (cursor?: string) => {
@@ -74,9 +76,10 @@ export default function SlackChat({ channelId }: SlackChatProps) {
       setProfiles(j.users ?? {});
       setMe(j.me);
       setLoading(false);
-      requestAnimationFrame(() =>
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-      );
+      requestAnimationFrame(() => {
+        const el = scrollerRef.current;
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     },
     [channelId]
   );
@@ -92,21 +95,6 @@ export default function SlackChat({ channelId }: SlackChatProps) {
     await load();
     if (!r.ok) alert("送信に失敗しました");
   }
-
-  // async function join() {
-  //   const r = await fetch("/api/slack/join", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ channel: channelId }),
-  //   });
-  //   const j = await r.json();
-  //   if (j.ok) {
-  //     await load();
-  //     if (webUrl) window.open(webUrl, "_blank");
-  //   } else {
-  //     alert("参加に失敗しました: " + JSON.stringify(j));
-  //   }
-  // }
 
   useEffect(() => {
     load();
@@ -137,18 +125,13 @@ export default function SlackChat({ channelId }: SlackChatProps) {
             </IconButton>
           </span>
         </Tooltip>
-        {/* <Tooltip title="チャンネルに参加（公開CH）">
-          <IconButton onClick={join} size="medium" color="primary">
-            <GroupAddIcon fontSize="medium" />
-          </IconButton>
-        </Tooltip> */}
         {webUrl && (
           <Button
             variant="outlined"
             size="small"
             startIcon={<SiSlack size={18} />}
             onClick={() => window.open(webUrl, "_blank", "noopener,noreferrer")}
-            sx={{ textTransform: "none" }} // 全角英字をそのまま
+            sx={{ textTransform: "none" }}
             className="dark:invert"
           >
             Slackで開く
@@ -160,6 +143,7 @@ export default function SlackChat({ channelId }: SlackChatProps) {
         className="dark:invert"
         elevation={0}
         variant="outlined"
+        ref={scrollerRef}
         sx={{
           p: 2,
           height: "70vh",
@@ -274,18 +258,25 @@ export default function SlackChat({ channelId }: SlackChatProps) {
           id={channelId}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="メッセージを入力（Enterで送信 / Shift+Enterで改行）"
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
+          onKeyDownCapture={(e) => {
+            const composing =
+              isComposing ||
+              e.nativeEvent?.isComposing === true ||
+              e.keyCode === 229;
+            if (e.key === "Enter" && !e.shiftKey) {
+              if (composing) return;
+              e.preventDefault();
+              send();
+            }
+          }}
+          placeholder="メッセージを入力"
           fullWidth
           size="small"
           multiline
           minRows={1}
           maxRows={4}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
         />
         <Button variant="contained" onClick={send} disableElevation>
           送信

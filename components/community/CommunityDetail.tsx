@@ -17,7 +17,7 @@ import { Grid } from "@mui/material";
 
 type Props = {
   community: Community;
-  imageUrl?: string;
+  imageUrl?: string | null;
 };
 
 export default function CommunityDetail({ community, imageUrl }: Props) {

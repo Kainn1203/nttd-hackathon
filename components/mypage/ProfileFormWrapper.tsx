@@ -10,7 +10,7 @@ type Me = {
   id: number;
   name?: string | null;
   handleName?: string | null;
-  imagePath?: string | null; // null も許可
+  imagePath?: string;
   origin?: string | null;
   pr?: string | null;
   lastName?: string | null;
@@ -21,6 +21,19 @@ type Me = {
 };
 
 type HobbyOption = { id: number; hobby: string };
+type UserHobby = { hobby_id: number };
+type ProfileFormInput = {
+  lastName: string;
+  firstName: string;
+  lastNameKana: string;
+  firstNameKana: string;
+  handleName: string;
+  origin: string;
+  pr: string;
+  university: string;
+  hobby: string[];
+  avatarFile?: File | null;
+};
 
 export default function ProfileFormWrapper({
   me,
@@ -29,44 +42,34 @@ export default function ProfileFormWrapper({
 }: {
   me: Me;
   hobbyOptions: HobbyOption[];
-  userHobby: { hobby_id: number }[];
+  userHobby: UserHobby[];
 }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleProfileSubmit = async (data: any) => {
+  const handleProfileSubmit = async (data: ProfileFormInput) => {
     try {
-      console.log("=== プロフィール更新開始 ===");
-      console.log("フォームデータ:", data);
-
       let uploadedImageUrl: string | null = null;
-
       // 画像アップロード処理
       if (data.avatarFile) {
-        console.log("画像アップロード開始 - ファイル:", {
-          name: data.avatarFile.name,
-          size: data.avatarFile.size,
-          type: data.avatarFile.type
-        });
-        
         try {
           uploadedImageUrl = await uploadImage(data.avatarFile, {
             bucket: "user-images",
-            folder: "avatars"
           });
-          
           console.log("画像アップロード成功:", uploadedImageUrl);
-          
         } catch (uploadError) {
           console.error("画像アップロード失敗:", uploadError);
-          alert(`画像のアップロードに失敗しました: ${uploadError.message}`);
+          const msg =
+            uploadError instanceof Error
+              ? uploadError.message
+              : String(uploadError);
+          alert(`画像のアップロードに失敗しました: ${msg}`);
           return;
         }
       }
 
       // プロフィールデータの準備
       const userData = {
-        id: me.id,
         last_name: data.lastName || null,
         first_name: data.firstName || null,
         last_name_katakana: data.lastNameKana || null,
@@ -75,11 +78,8 @@ export default function ProfileFormWrapper({
         origin: data.origin || null,
         pr: data.pr || null,
         university: data.university || null,
-        // 新しい画像がある場合は新しいURL、なければ既存を保持、それもなければnull
-        image_path: uploadedImageUrl || me.imagePath || null,
+        image_path: uploadedImageUrl || null,
       };
-
-      console.log("保存するデータ:", userData);
 
       // データベース更新
       const { data: updateResult, error: userError } = await supabase
@@ -89,26 +89,25 @@ export default function ProfileFormWrapper({
         .select("*");
 
       if (userError) {
-        console.error("データベース更新エラー:", userError);
-        throw new Error(`プロフィールの更新に失敗しました: ${userError.message}`);
+        throw new Error(
+          `プロフィールの更新に失敗しました: ${userError.message}`
+        );
       }
 
       console.log("データベース更新成功:", updateResult);
 
       // 趣味の処理
       await updateUserHobbies(data.hobby);
-
-      console.log("全ての更新が完了しました");
       alert("保存しました");
       router.push("/");
-      
     } catch (error) {
       console.error("プロフィール更新失敗:", error);
-      alert(`保存に失敗しました: ${error.message}`);
+      const msg = error instanceof Error ? error.message : String(error);
+      alert(`保存に失敗しました: ${msg}`);
     }
   };
 
-  // 趣味更新処理を分離
+  // 趣味更新処理
   const updateUserHobbies = async (selectedHobbies: string[]) => {
     try {
       // 既存の趣味を取得
@@ -128,9 +127,7 @@ export default function ProfileFormWrapper({
       if (newHobbyNames.length > 0) {
         const { data: insertedHobbies, error: insertError } = await supabase
           .from("hobbies")
-          .insert(
-            newHobbyNames.map((h) => ({ hobby: h, create_user: me.id }))
-          )
+          .insert(newHobbyNames.map((h) => ({ hobby: h, create_user: me.id })))
           .select("id, hobby");
 
         if (insertError) throw new Error("新しい趣味の追加に失敗しました");
@@ -172,7 +169,6 @@ export default function ProfileFormWrapper({
         if (insertError) throw new Error("趣味の追加に失敗しました");
       }
     } catch (error) {
-      console.error("趣味更新エラー:", error);
       throw error;
     }
   };
