@@ -71,7 +71,9 @@ export default function EventDetail({
 
   return (
     <>
-      <Card>
+      <Card sx={{
+        background: 'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)'
+      }}>
         <CardContent>
           <Box sx={{ mb: 3 }}>
             <Box
@@ -216,7 +218,14 @@ export default function EventDetail({
             </Box>
 
             <Box>
-              <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 1,
+                  background:
+                    'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)',
+                }}
+              >
                 <Typography variant="h6" gutterBottom>
                   参加状況
                 </Typography>

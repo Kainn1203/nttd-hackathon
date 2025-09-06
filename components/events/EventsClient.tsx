@@ -59,14 +59,14 @@ const useEvents = () => {
 
       // C. マージ
       const countMap = new Map<number, number>(
-        (counts ?? []).map((row: any) => [
+        (counts ?? []).map((row: { event_id: number; member_count: number }) => [
           Number(row.event_id),
           Number(row.member_count),
         ])
       );
 
       const eventsWithCount: EventWithMembers[] = await Promise.all(
-        eventsData.map(async (e: any) => {
+        eventsData.map(async (e) => {
           const { data: candidateDates, error: dateError } = await supabase
             .from("candidate_date")
             .select("candidate_date")
@@ -125,7 +125,6 @@ const useEvents = () => {
 
 export default function EventsClient({
   meId,
-  slackUserToken,
 }: {
   meId: number;
   slackUserToken?: string;
@@ -161,6 +160,7 @@ export default function EventsClient({
     } else {
       if (loading) setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meId]);
 
   const createEvent = async (e: React.FormEvent) => {
@@ -236,8 +236,8 @@ export default function EventsClient({
 
       alert(`🎉 イベント「${newEvent.name.trim()}」が作成されました！`);
       router.push(`/events/${event.id}`);
-    } catch (e: any) {
-      alert("イベントの作成に失敗しました: " + e.message);
+    } catch (e) {
+      alert("イベントの作成に失敗しました: " + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsSubmitting(false);
     }
@@ -312,7 +312,7 @@ export default function EventsClient({
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "transparent", py: 4 }}>
       <Container maxWidth="lg">
         <Box
           mb={4}

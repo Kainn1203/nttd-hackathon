@@ -31,8 +31,53 @@ export default async function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative overflow-x-hidden`}
       >
+        {/* 背景装飾（Hero以外も含めた全体用） */}
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          {/* メインのグラデーション背景（淡い青系） */}
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50" />
+
+          {/* 曲線的な装飾: 位置と色は控えめに */}
+          <div
+            className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-30"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(14,165,233,0.10) 50%, transparent 100%)',
+            }}
+          />
+          <div
+            className="absolute top-1/4 -left-32 w-80 h-80 rounded-full opacity-25"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(139,92,246,0.12) 0%, rgba(124,58,237,0.08) 50%, transparent 100%)',
+            }}
+          />
+          <div
+            className="absolute bottom-20 right-1/4 w-64 h-64 rounded-full opacity-20"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(236,72,153,0.10) 0%, rgba(219,39,119,0.06) 50%, transparent 100%)',
+            }}
+          />
+
+          {/* 下部の柔らかな波形（控えめなグラデーション） */}
+          <div className="absolute bottom-0 left-0 w-full h-32 opacity-20">
+            <svg viewBox="0 0 1200 120" className="w-full h-full">
+              <path
+                d="M0,60 C300,100 500,20 800,60 C900,80 1000,40 1200,60 L1200,120 L0,120 Z"
+                fill="url(#wave-gradient)"
+              />
+              <defs>
+                <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(56,189,248,0.10)" />
+                  <stop offset="50%" stopColor="rgba(139,92,246,0.08)" />
+                  <stop offset="100%" stopColor="rgba(236,72,153,0.06)" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
         <AppRouterCacheProvider>
           <UserProvider value={me}>
             <Header /> {/* ← ヘッダーを追加 */}

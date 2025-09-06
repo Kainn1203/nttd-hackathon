@@ -14,7 +14,7 @@ import {
   Container,
 } from "@mui/material";
 import { SiSlack } from "react-icons/si";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { Refresh as RefreshIcon } from "@mui/icons-material";
 
 type Msg = { ts: string; text?: string; user?: string; subtype?: string };
 type Profiles = Record<string, { name: string; image: string }>;

@@ -129,7 +129,7 @@ export default function EventList({
   return (
     <div className="space-y-6">
       {/* Search and Filter Controls */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="rounded-lg p-6 border border-gray-300 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Search */}
           <div className="flex-1 max-w-md">

@@ -137,7 +137,7 @@ const ChannelCreationForm: React.FC<{
   communityName: string;
   onCreateChannel: (name: string, description: string) => Promise<void>;
   isCreating: boolean;
-}> = ({ communityName, onCreateChannel, isCreating }) => {
+}> = ({ onCreateChannel, isCreating }) => {
   const [channelName, setChannelName] = useState("");
   const [description, setDescription] = useState("");
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
 import MemberCard from "./MemberCard";
 import MemberDialog from "./MemberDialog";
 
@@ -27,16 +27,28 @@ export default function MembersIndex({ members }: { members: Member[] }) {
 
   return (
     <>
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(4, 1fr)',
+          },
+          gap: 3,
+          justifyItems: 'center',
+          width: '100%',
+        }}
+      >
         {members.map((member) => (
-          <Grid item xs={12} sm={6} md={4} key={member.id}>
-            <MemberCard
-              member={member}
-              onClick={() => setSelectedMember(member)}
-            />
-          </Grid>
+          <MemberCard
+            key={member.id}
+            member={member}
+            onClick={() => setSelectedMember(member)}
+          />
         ))}
-      </Grid>
+      </Box>
 
       <MemberDialog
         open={!!selectedMember}

@@ -12,10 +12,12 @@ import {
   Chip,
   Paper,
 } from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import StarIcon from "@mui/icons-material/Star";
-import TextsmsIcon from "@mui/icons-material/Textsms";
-import PersonIcon from "@mui/icons-material/Person";
+import {
+  LocationOn as LocationOnIcon,
+  Star as StarIcon,
+  Textsms as TextsmsIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 
 interface Member {
   id: number;
