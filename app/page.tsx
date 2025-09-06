@@ -23,6 +23,7 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
 import ForumIcon from "@mui/icons-material/Forum";
 import EventIcon from "@mui/icons-material/Event";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 
 export const metadata = { title: "NTTデータ内定者向けコミュニティ" };
 
@@ -122,7 +123,7 @@ export default async function Home() {
                 fontSize: { xs: 28, sm: 36, md: 44 },
               }}
             >
-              {me.name ?? "内定者"}さん、交流をもっとスムーズに。
+              {me.name ?? "内定者"}さん、交流をもっとスムーズに
             </Typography>
 
             <Typography
@@ -130,7 +131,7 @@ export default async function Home() {
               color="text.secondary"
               sx={{ maxWidth: 720 }}
             >
-              コミュニティの発見、相互理解、コラボを後押しする内定者向けポータル。
+              コミュニティの発見、相互理解、コラボを後押しする内定者向けポータル。<br />
               プロフィールの作成からコミュニティ参加まで、ここから始めましょう。
             </Typography>
 
@@ -242,12 +243,13 @@ export default async function Home() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" },
             columnGap: { xs: 0, md: 3 },
             rowGap: { xs: 2, md: 3 },
+            alignItems: 'stretch',
           }}
         >
-          <Box>
+          <Box sx={{ gridColumn: { md: '1 / 2' }, gridRow: { md: '1' } }}>
             <Card sx={{ height: "100%" }}>
               <CardActionArea
                 component={Link}
@@ -262,14 +264,16 @@ export default async function Home() {
                     </Box>
                     <Typography variant="h6" fontWeight={800}>内定者一覧</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      学部・興味・スキルで検索。つながりを見つけよう。
+                      学部・興味・スキルで検索。<br />
+                      つながりを見つけよう。
                     </Typography>
                   </Stack>
                 </CardContent>
               </CardActionArea>
             </Card>
           </Box>
-          <Box>
+
+          <Box sx={{ gridColumn: { md: '2 / 3' }, gridRow: { md: '1' } }}>
             <Card sx={{ height: "100%" }}>
               <CardActionArea
                 component={Link}
@@ -293,7 +297,7 @@ export default async function Home() {
           </Box>
 
           {/* イベント */}
-          <Box>
+          <Box sx={{ gridColumn: { md: '3 / 4' }, gridRow: { md: '1' } }}>
             <Card sx={{ height: "100%" }}>
               <CardActionArea
                 component={Link}
@@ -309,6 +313,37 @@ export default async function Home() {
                     <Typography variant="h6" fontWeight={800}>イベント</Typography>
                     <Typography variant="body2" color="text.secondary">
                       勉強会や交流会などの最新イベントをチェック。
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Box>
+
+          {/* 社畜度診断（右端） */}
+          <Box sx={{ gridColumn: { md: '4 / 5' }, gridRow: { md: '1' } }}>
+            <Card
+              sx={{
+                height: "100%",
+                background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+                color: 'common.white',
+                '& .MuiTypography-body2': { color: 'rgba(255,255,255,0.9)' },
+              }}
+            >
+              <CardActionArea
+                component={Link}
+                href="/diagnosis"
+                aria-label="社畜度診断ページへ移動"
+                sx={{ height: '100%', '&:hover .card-icon': { transform: 'scale(1.06)' } }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={1.5}>
+                    <Box className="card-icon" sx={{ display: 'inline-flex', transition: 'transform .15s ease', transformOrigin: 'center', color: 'inherit' }}>
+                      <PsychologyIcon fontSize="large" color="inherit" />
+                    </Box>
+                    <Typography variant="h6" fontWeight={800}>社畜度診断</Typography>
+                    <Typography variant="body2">
+                      あなたの社畜度を5タイプで診断してみよう。
                     </Typography>
                   </Stack>
                 </CardContent>

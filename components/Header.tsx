@@ -20,6 +20,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ForumIcon from "@mui/icons-material/Forum";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 import EventIcon from "@mui/icons-material/Event";
 import PersonIcon from "@mui/icons-material/Person";
 
@@ -27,6 +28,7 @@ const nav = [
   { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
   { href: "/events", label: "イベント", icon: <EventIcon /> },
+  { href: "/diagnosis", label: "社畜度診断", icon: <PsychologyIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
 ];
 
@@ -70,7 +72,7 @@ export default function Header() {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
+                gridTemplateColumns: "repeat(5, 1fr)",
                 gap: 1,
                 width: "100%",
                 alignItems: "stretch",
