@@ -111,7 +111,7 @@ export default async function Home() {
             "radial-gradient(900px 420px at 5% -10%, rgba(0,91,172,.14), transparent), radial-gradient(700px 500px at 100% 0%, rgba(0,191,166,.12), transparent)",
         }}
       >
-        {/* 動くグラデーションのオーバーレイ（リップルを戻してスムーズなグラデ） */}
+        {/* 動くグラデーション（Heroセクションのみ） */}
         <Box
           aria-hidden
           sx={{
@@ -180,10 +180,11 @@ export default async function Home() {
               overflowY: "auto",
               py: 1,
               position: "relative",
+              width: "100%",
             }}
           >
             {(eventAnnouncements ?? []).length > 0 ? (
-              <Stack spacing={0}>
+              <Stack spacing={0} sx={{ width: "100%" }}>
                 {eventAnnouncements!.map((a, idx) =>
                   a.event_id ? (
                     <Link
@@ -355,7 +356,13 @@ export default async function Home() {
           }}
         >
           <Box sx={{ gridColumn: { md: "1 / 2" }, gridRow: { md: "1" } }}>
-            <Card sx={{ height: "100%" }}>
+            <Card
+              sx={{
+                height: "100%",
+                background:
+                  "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+              }}
+            >
               <CardActionArea
                 component={Link}
                 href="/members"
@@ -392,7 +399,13 @@ export default async function Home() {
           </Box>
 
           <Box sx={{ gridColumn: { md: "2 / 3" }, gridRow: { md: "1" } }}>
-            <Card sx={{ height: "100%" }}>
+            <Card
+              sx={{
+                height: "100%",
+                background:
+                  "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+              }}
+            >
               <CardActionArea
                 component={Link}
                 href="/communities"
@@ -428,7 +441,13 @@ export default async function Home() {
 
           {/* イベント */}
           <Box sx={{ gridColumn: { md: "3 / 4" }, gridRow: { md: "1" } }}>
-            <Card sx={{ height: "100%" }}>
+            <Card
+              sx={{
+                height: "100%",
+                background:
+                  "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+              }}
+            >
               <CardActionArea
                 component={Link}
                 href="/events"
@@ -508,7 +527,12 @@ export default async function Home() {
 
           {/* あなたのプロフィール（2段目・1行で配置） */}
           <Box sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}>
-            <Card>
+            <Card
+              sx={{
+                background:
+                  "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+              }}
+            >
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="subtitle2" color="text.secondary">
                   あなたのプロフィール
