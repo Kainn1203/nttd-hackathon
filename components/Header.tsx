@@ -20,12 +20,13 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ForumIcon from "@mui/icons-material/Forum";
+import EventIcon from "@mui/icons-material/Event";
 import PersonIcon from "@mui/icons-material/Person";
 
 const nav = [
   { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
-  { href: "/events", label: "イベント", icon: <ForumIcon /> },
+  { href: "/events", label: "イベント", icon: <EventIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
 ];
 
@@ -54,22 +55,28 @@ export default function Header() {
               fontWeight: 800,
               fontSize: { xs: 16, sm: 18 },
               mr: 1.5,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: { xs: '60%', md: 'none' },
             }}
+            noWrap
           >
             NTTデータ内定者向けコミュニティ
           </Typography>
 
-          {/* md以上：3等分で横一列に埋める */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}>
+          {/* 余白が狭い時はボタンをハンバーガーに収納（lg以上で表示） */}
+          <Box sx={{ display: { xs: "none", lg: "flex" }, flexGrow: 1 }}>
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(4, 1fr)",
                 gap: 1,
                 width: "100%",
+                alignItems: "stretch",
               }}
             >
-              {nav.filter(n => n.label !== "マイページ").map((n) => {
+              {nav.map((n) => {
                 const targetHref = n.label === "内定者一覧" ? ichiranHref : n.href;
                 const isActive = pathname === n.href || pathname.startsWith(`${n.href}/`);
                 return (
@@ -77,7 +84,14 @@ export default function Header() {
                     key={n.href}
                     component={Link}
                     href={targetHref}
-                    startIcon={n.icon}
+                    startIcon={
+                      <Box
+                        className="nav-icon"
+                        sx={{ display: 'inline-flex', transition: 'transform .2s ease', transformOrigin: 'center' }}
+                      >
+                        {n.icon}
+                      </Box>
+                    }
                     size="small"
                     color="primary"
                     fullWidth
@@ -87,45 +101,25 @@ export default function Header() {
                       justifyContent: "center",
                       fontWeight: 700,
                       borderRadius: 1,
+                      whiteSpace: 'nowrap',
+                      px: 2,
                       backgroundColor: isActive ? "action.selected" : "transparent",
-                      "&:hover": { backgroundColor: "action.hover" },
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                      "&:hover .nav-icon": { transform: 'scale(1.12)' },
                     }}
                   >
                     {n.label}
                   </Button>
                 );
               })}
-            <Box sx={{ ml: 1 }}>
-              {(() => {
-                const n = nav.find(v => v.label === "マイページ");
-                const isActive = pathname === n?.href || pathname.startsWith(`${n?.href}/`);
-                return (
-                  <Button
-                    component={Link}
-                    href={n?.href || "/myPage"}
-                    startIcon={<PersonIcon />}
-                    size="small"
-                    color="primary"
-                    sx={{
-                      fontWeight: 700,
-                      borderRadius: 1,
-                      whiteSpace: 'nowrap',
-                      px: 2,
-                      backgroundColor: isActive ? "action.selected" : "transparent",
-                      "&:hover": { backgroundColor: "action.hover" },
-                    }}
-                  >
-                    マイページ
-                  </Button>
-                );
-              })()}
-            </Box>
             </Box>
           </Box>
 
           {/* モバイル：ハンバーガー */}
           <IconButton
-            sx={{ display: { xs: "inline-flex", md: "none" } }}
+            sx={{ display: { xs: "inline-flex", lg: "none" } }}
             onClick={() => setOpen(true)}
             aria-label="メニュー"
           >

@@ -22,6 +22,7 @@ import {
 import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
 import ForumIcon from "@mui/icons-material/Forum";
+import EventIcon from "@mui/icons-material/Event";
 
 export const metadata = { title: "NTTデータ内定者向けコミュニティ" };
 
@@ -35,8 +36,32 @@ export default async function Home() {
       ? me.imagePath
       : getPublicImageUrl("user-images", me.imagePath) ?? undefined;
   }
-  // ユーザーの趣味（名前配列）
+  // Supabaseクライアント
   const supabase = await createClient();
+
+  // イベントのお知らせ（最新順に10件）
+  const { data: eventAnnouncements } = await supabase
+    .from("event_announcements")
+    .select("id, description, created_at, event_id")
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  // 紐づくイベント情報（location, deadline）をまとめて取得
+  const eventIds = Array.from(
+    new Set((eventAnnouncements ?? []).map((a: any) => a.event_id).filter(Boolean))
+  ) as number[];
+  let eventsById: Record<number, { location?: string | null; deadline?: string | null }> = {};
+  if (eventIds.length > 0) {
+    const { data: eventsRows } = await supabase
+      .from("events")
+      .select("id, location, deadline")
+      .in("id", eventIds);
+    (eventsRows ?? []).forEach((e: any) => {
+      eventsById[e.id] = { location: e.location ?? null, deadline: e.deadline ?? null };
+    });
+  }
+
+  // ユーザーの趣味（名前配列）
   const { data: userHobby } = await supabase
     .from("user_hobbies")
     .select("hobby_id")
@@ -57,13 +82,32 @@ export default async function Home() {
       {/* Hero：余白を小さめに、CTAを詰める */}
       <Box
         sx={{
+          position: 'relative',
+          overflow: 'hidden',
           py: { xs: 6, md: 8 },
           mb: { xs: 3, md: 4 },
           background:
             "radial-gradient(900px 420px at 5% -10%, rgba(0,91,172,.14), transparent), radial-gradient(700px 500px at 100% 0%, rgba(0,191,166,.12), transparent)",
         }}
       >
-        <Container maxWidth="lg">
+        {/* 動くグラデーションのオーバーレイ（リップルを戻してスムーズなグラデ） */}
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            background:
+              'radial-gradient(60% 80% at 10% 0%, rgba(0,91,172,.28), transparent), radial-gradient(70% 80% at 90% -10%, rgba(0,191,166,.24), transparent), linear-gradient(120deg, rgba(0,91,172,.20), rgba(0,191,166,.20), rgba(131,56,236,.14))',
+            backgroundSize: 'auto, auto, 600% 600%',
+            mixBlendMode: 'normal',
+            opacity: 0.98,
+            filter: 'saturate(1.15) contrast(1.05)',
+            animation: 'heroGradient 6s ease-in-out infinite',
+          }}
+        />
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Stack spacing={2} alignItems="flex-start">
             <Typography variant="overline" color="primary">
               ようこそ
@@ -95,10 +139,101 @@ export default async function Home() {
         </Container>
       </Box>
 
-      {/* お知らせ（DB連携なしのシンプル表示） */}
+      {/* お知らせ（1つの枠で縦スクロール表示） */}
       <Container maxWidth="lg" disableGutters sx={{ px: { xs: 0, sm: 3 }, mb: 2 }}>
-        <Alert severity="info" variant="outlined" sx={{ borderRadius: 2, whiteSpace: 'pre-wrap' }}>
-          {process.env.NEXT_PUBLIC_NOTICE_MESSAGE ?? "現在お知らせはありません"}
+        <Alert icon={false} severity="info" variant="outlined" sx={{ borderRadius: 2, p: 0, overflow: 'hidden' }}>
+          <Box className="notice-scroll" sx={{ maxHeight: 180, overflowY: 'auto', py: 1, position: 'relative' }}>
+            {(eventAnnouncements ?? []).length > 0 ? (
+              <Stack spacing={0}>
+                {eventAnnouncements!.map((a, idx) => (
+                  a.event_id ? (
+                    <Link
+                      key={a.id}
+                      href={`/events/${a.event_id}`}
+                      style={{ display: 'block', width: '100%', textDecoration: 'none', color: 'inherit' }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex', alignItems: 'center', gap: 1, width: '100%', px: 1.5, py: 1, cursor: 'pointer',
+                          borderBottom: idx === (eventAnnouncements!.length - 1) ? 'none' : '1px dotted', borderColor: 'divider',
+                          transition: 'background-color .15s ease', '&:hover': { backgroundColor: 'action.hover' },
+                          '&:hover .ann-text': { color: 'primary.dark', textDecorationThickness: '2px', transform: 'translateX(2px)' },
+                        }}
+                      >
+                        {/* 作成日時 */}
+                        <Typography variant="caption" color="text.secondary" sx={{ minWidth: { xs: 120, sm: 140 } }}>
+                          {a.created_at ? new Date(a.created_at).toLocaleString('ja-JP') : ''}
+                        </Typography>
+                        {/* 場所タグ（location） */}
+                        {eventsById[a.event_id]?.location ? (
+                          (() => {
+                            const loc = String(eventsById[a.event_id]!.location);
+                            const color = /オンライン/i.test(loc)
+                              ? 'success'
+                              : /東京/i.test(loc)
+                              ? 'info'
+                              : 'secondary';
+                            return (
+                              <Chip
+                                label={loc}
+                                size="small"
+                                color={color as any}
+                                variant="outlined"
+                              />
+                            );
+                          })()
+                        ) : null}
+                        {/* 本文 */}
+                        <Typography
+                          variant="body2"
+                          color="primary"
+                          sx={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textDecoration: 'underline',
+                            transition: 'color .15s ease, text-decoration-thickness .15s ease, transform .15s ease',
+                            minWidth: 0,
+                          }}
+                          className="ann-text"
+                          title={a.description || ''}
+                        >
+                          {a.description}
+                        </Typography>
+                        {/* テキストの後ろの可視スペース（右端の締切まで拡張） */}
+                        <Box sx={{ flexGrow: 1, pr: { xs: 1, sm: 2, md: 3 } }} />
+                        {/* 締切タグ（deadline） */}
+                        {eventsById[a.event_id]?.deadline ? (
+                          <Chip label={`締切: ${new Date(eventsById[a.event_id]!.deadline as string).toLocaleDateString('ja-JP')}`} size="small" color="warning" variant="outlined" sx={{ ml: 1 }} />
+                        ) : null}
+                      </Box>
+                    </Link>
+                  ) : (
+                    <Box
+                      key={a.id}
+                      sx={{
+                        display: 'flex', alignItems: 'center', gap: 1, width: '100%', px: 1.5, py: 1,
+                        borderBottom: idx === (eventAnnouncements!.length - 1) ? 'none' : '1px dotted', borderColor: 'divider'
+                      }}
+                    >
+                      <Typography variant="caption" color="text.secondary" sx={{ minWidth: { xs: 120, sm: 140 } }}>
+                        {a.created_at ? new Date(a.created_at).toLocaleString('ja-JP') : ''}
+                      </Typography>
+                      <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                        {a.description}
+                      </Typography>
+                    </Box>
+                  )
+                ))}
+              </Stack>
+            ) : (
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  現在お知らせはありません
+                </Typography>
+              </Box>
+            )}
+          </Box>
         </Alert>
       </Container>
 
@@ -107,17 +242,24 @@ export default async function Home() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
             columnGap: { xs: 0, md: 3 },
             rowGap: { xs: 2, md: 3 },
           }}
         >
           <Box>
             <Card sx={{ height: "100%" }}>
-              <CardActionArea component={Link} href="/members" aria-label="内定者一覧ページへ移動">
+              <CardActionArea
+                component={Link}
+                href="/members"
+                aria-label="内定者一覧ページへ移動"
+                sx={{ height: '100%', '&:hover .card-icon': { transform: 'scale(1.06)' } }}
+              >
                 <CardContent sx={{ p: 3 }}>
                   <Stack spacing={1.5}>
-                    <GroupsIcon fontSize="large" color="primary" />
+                    <Box className="card-icon" sx={{ display: 'inline-flex', transition: 'transform .15s ease', transformOrigin: 'center' }}>
+                      <GroupsIcon fontSize="large" color="primary" />
+                    </Box>
                     <Typography variant="h6" fontWeight={800}>内定者一覧</Typography>
                     <Typography variant="body2" color="text.secondary">
                       学部・興味・スキルで検索。つながりを見つけよう。
@@ -129,10 +271,17 @@ export default async function Home() {
           </Box>
           <Box>
             <Card sx={{ height: "100%" }}>
-              <CardActionArea component={Link} href="/communities" aria-label="コミュニティページへ移動">
+              <CardActionArea
+                component={Link}
+                href="/communities"
+                aria-label="コミュニティページへ移動"
+                sx={{ height: '100%', '&:hover .card-icon': { transform: 'scale(1.06)' } }}
+              >
                 <CardContent sx={{ p: 3 }}>
                   <Stack spacing={1.5}>
-                    <ForumIcon fontSize="large" color="primary" />
+                    <Box className="card-icon" sx={{ display: 'inline-flex', transition: 'transform .15s ease', transformOrigin: 'center' }}>
+                      <ForumIcon fontSize="large" color="primary" />
+                    </Box>
                     <Typography variant="h6" fontWeight={800}>コミュニティ</Typography>
                     <Typography variant="body2" color="text.secondary">
                       サークル・PJ・勉強会など、興味ある場に参加しよう。
@@ -143,6 +292,31 @@ export default async function Home() {
             </Card>
           </Box>
 
+          {/* イベント */}
+          <Box>
+            <Card sx={{ height: "100%" }}>
+              <CardActionArea
+                component={Link}
+                href="/events"
+                aria-label="イベントページへ移動"
+                sx={{ height: '100%', '&:hover .card-icon': { transform: 'scale(1.06)' } }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={1.5}>
+                    <Box className="card-icon" sx={{ display: 'inline-flex', transition: 'transform .15s ease', transformOrigin: 'center' }}>
+                      <EventIcon fontSize="large" color="primary" />
+                    </Box>
+                    <Typography variant="h6" fontWeight={800}>イベント</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      勉強会や交流会などの最新イベントをチェック。
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Box>
+
+
           {/* あなたのプロフィール（2段目・1行で配置） */}
           <Box sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}>
             <Card>
@@ -151,6 +325,27 @@ export default async function Home() {
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 0.5 }}>
                   <Avatar src={avatarUrl} alt={me.name ?? "プロフィール"} sx={{ width: 40, height: 40 }} />
                   <Typography variant="h6" fontWeight={800}>{me.name ?? "未設定"}</Typography>
+                  <Box sx={{ flexGrow: 1 }} />
+                  <Button
+                    component={Link}
+                    href="/diagnosis"
+                    size="small"
+                    variant="contained"
+                    aria-label="社畜度診断ページへ移動"
+                    sx={{
+                      borderRadius: 9999,
+                      px: 2,
+                      fontWeight: 800,
+                      whiteSpace: 'nowrap',
+                      background: 'linear-gradient(135deg, #7C4DFF 0%, #26A69A 100%)',
+                      color: 'common.white',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #6A3DE8 0%, #1E8F86 100%)',
+                      },
+                    }}
+                  >
+                    社畜度診断
+                  </Button>
                 </Stack>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack spacing={0.5}>
