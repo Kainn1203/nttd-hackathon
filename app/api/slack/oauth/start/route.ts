@@ -15,6 +15,7 @@ export async function GET(req: Request) {
   const userScopes = [
     "channels:read",
     "channels:history",
+    "channels:write",
     "chat:write",
     "users:read",
   ].join(",");
