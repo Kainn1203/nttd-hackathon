@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 
+
 interface DiagnosisResultsProps {
   userName: string;
   result: {
@@ -23,14 +24,14 @@ export default function DiagnosisResults({
   result,
   onRestart,
 }: DiagnosisResultsProps) {
-  // タイプに応じた表示設定（画像パスを更新）
+  // タイプに応じた表示設定
   const typeConfig = {
     type1: {
       icon: "🌸",
       color: "from-green-300 to-green-400",
       bgGradient: "from-green-200/15 via-green-100/10 to-white/5",
       borderColor: "border-green-300/30",
-      imagePath: "/images/result_score_v1_transparent.png", // 画像1: ワークライフバランス重視
+      image: "/images/result_score_v1_transparent.png", // 画像1: ワークライフバランス重視
       advice: "自分のペース最優先、マイライフイズマイライフ",
       details: {
         characteristic:
@@ -45,10 +46,10 @@ export default function DiagnosisResults({
     },
     type2: {
       icon: "💕",
-      color: "from-blue-300 to-blue-400",
+      color: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-200/15 via-blue-100/10 to-white/5",
-      borderColor: "border-blue-300/30",
-      imagePath: "/images/result_score_v2_transparent.png", // 画像2: 残業体質
+      borderColor: "border-blue-400/40",
+      image: "/images/result_score_v2_transparent.png", // 画像2: 残業体質
       advice: "定時ダッシュは正義、メリハリこそ力の源",
       details: {
         characteristic:
@@ -66,7 +67,7 @@ export default function DiagnosisResults({
       color: "from-yellow-300 to-yellow-400",
       bgGradient: "from-yellow-200/15 via-yellow-100/10 to-white/5",
       borderColor: "border-yellow-300/30",
-      imagePath: "/images/result_score_v3_transparent.png", // 画像3: 効率重視
+      image: "/images/result_score_v3_transparent.png", // 画像3: 効率重視
       advice: "効率命！リソースを最大化するスマートワーカー",
       details: {
         characteristic:
@@ -84,7 +85,7 @@ export default function DiagnosisResults({
       color: "from-orange-300 to-orange-400",
       bgGradient: "from-orange-200/15 via-orange-100/10 to-white/5",
       borderColor: "border-orange-300/30",
-      imagePath: "/images/result_score_v4_transparent.png", // 画像4: バランス型
+      image: "/images/result_score_v4_transparent.png", // 画像4: バランス型
       advice: "責任感は強い、でも無理はしがちな現実派",
       details: {
         characteristic:
@@ -102,7 +103,7 @@ export default function DiagnosisResults({
       color: "from-red-300 to-red-400",
       bgGradient: "from-red-200/15 via-red-100/10 to-white/5",
       borderColor: "border-red-300/30",
-      imagePath: "/images/result_score_v5_transparent.png", // 画像5: 仕事中毒
+      image: "/images/result_score_v5_transparent.png", // 画像5: 仕事中毒
       advice: "働くことが生きがい！自己犠牲すらも厭わぬ使命感タイプ",
       details: {
         characteristic:
@@ -176,11 +177,14 @@ export default function DiagnosisResults({
               {/* 旧: -inset-5 */}
               <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl border-2 border-white/60">
                 {/* 旧: p-6 */}
-                <img
-                  src={config.imagePath}
+                <Image
+                  src={config.image}
                   alt={result.type.name}
-                  className="block rounded-2xl sm:rounded-3xl object-contain w-full h-auto max-w-3xl mx-auto" /* 旧: max-w-5xl */
-                  style={{ aspectRatio: "965/544" }}
+                  width={965}
+                  height={544}
+                  className="block rounded-2xl sm:rounded-3xl object-contain w-full h-auto max-w-3xl mx-auto"
+                  priority
+                  unoptimized
                 />
               </div>
               <div
@@ -198,51 +202,56 @@ export default function DiagnosisResults({
             </div>
           </div>
 
-          {/* 結果表示ブロック */}
+          {/* 結果表示ブロック - タイプを強調 */}
           <div
-            className={`p-4 sm:p-6 bg-gradient-to-r ${config.bgGradient} backdrop-blur-sm rounded-xl sm:rounded-2xl ${config.borderColor} border shadow-lg mb-6 sm:mb-8`}
+            className={`p-6 sm:p-8 lg:p-10 bg-gradient-to-r ${config.bgGradient} backdrop-blur-sm rounded-xl sm:rounded-2xl ${config.borderColor} border-2 shadow-2xl mb-6 sm:mb-8 relative overflow-hidden`}
           >
-            {/* 旧: p-8 rounded-3xl mb-10 */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between text-center lg:text-left">
-              <div className="mb-4 sm:mb-6 lg:mb-0 lg:mr-6 sm:lg:mr-10">
-                {/* 旧: mb-8 mr-12 */}
-                <h2 className="font-semibold text-white/95 text-2xl sm:text-3xl lg:text-4xl drop-shadow-lg mb-2 sm:mb-4">
-                  {/* 旧: text-5xl mb-6 */}
-                  {result.type.name}
+            {/* 装飾的な背景要素 */}
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${config.color} opacity-10 rounded-full blur-3xl`}></div>
+            <div className={`absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${config.color} opacity-10 rounded-full blur-2xl`}></div>
+            
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between text-center lg:text-left relative z-10">
+              <div className="mb-6 sm:mb-8 lg:mb-0 lg:mr-6 sm:lg:mr-10 flex-1">
+                {/* タイプアイコンを大きく表示 */}
+                <div className="text-5xl sm:text-6xl lg:text-7xl mb-3 sm:mb-4 filter drop-shadow-2xl">
+                  {config.icon}
+                </div>
+                {/* タイプ名をより大きく、より目立つように */}
+                <h2 className="font-bold text-white text-3xl sm:text-4xl lg:text-5xl drop-shadow-2xl mb-3 sm:mb-5 tracking-wide">
+                  <span className={`bg-gradient-to-r ${config.color} bg-clip-text text-transparent`}>
+                    {result.type.name}
+                  </span>
                 </h2>
-                <p className="text-base sm:text-lg lg:text-xl text-white/85 drop-shadow-sm leading-relaxed px-2 sm:px-0">
-                  {/* 旧: text-2xl */}
+                {/* キャッチコピーも少し大きく */}
+                <p className="text-lg sm:text-xl lg:text-2xl text-white font-semibold drop-shadow-lg leading-relaxed px-2 sm:px-0">
                   {config.advice}
                 </p>
               </div>
 
-              {/* スコア表示 */}
-              <div className="text-center lg:text-right">
-                <div className="text-sm sm:text-base text-white/90 font-medium mb-2 sm:mb-3">
-                  {/* 旧: text-xl mb-4 */}
-                  スコア
+              {/* スコア表示 - より目立つデザインに */}
+              <div className="text-center lg:text-right bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20">
+                <div className="text-base sm:text-lg text-white font-bold mb-2 sm:mb-3 uppercase tracking-wider drop-shadow">
+                  Score
                 </div>
                 <div className="relative">
-                  <div className="text-4xl sm:text-5xl lg:text-6xl font-light text-white/95 mb-3 sm:mb-5 drop-shadow-lg">
-                    {/* 旧: text-7xl mb-6 */}
-                    {result.scores}
-                    <span className="text-xl sm:text-2xl text-white/70 ml-1 sm:ml-2">
-                      {/* 旧: text-3xl */}点
+                  <div className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-3 sm:mb-5 drop-shadow-2xl">
+                    <span className={`bg-gradient-to-r ${config.color} bg-clip-text text-transparent`}>
+                      {result.scores}
+                    </span>
+                    <span className="text-2xl sm:text-3xl text-white/80 ml-1 sm:ml-2 font-medium">
+                      点
                     </span>
                   </div>
-                  <div className="w-40 sm:w-48 mx-auto lg:mx-0">
-                    {/* 旧: w-56 */}
-                    <div className="bg-white/20 rounded-full h-5 sm:h-6 border border-white/30 overflow-hidden">
-                      {/* 旧: h-8 */}
+                  <div className="w-48 sm:w-56 mx-auto lg:mx-0">
+                    <div className="bg-white/15 rounded-full h-6 sm:h-8 border-2 border-white/40 overflow-hidden shadow-inner">
                       <div
-                        className={`bg-gradient-to-r ${config.color} h-5 sm:h-6 rounded-full shadow-sm transition-all duration-1000 relative`}
+                        className={`bg-gradient-to-r ${config.color} h-full rounded-full shadow-lg transition-all duration-1000 relative`}
                         style={{ width: `${result.scores}%` }}
                       >
-                        <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+                        <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>
                       </div>
                     </div>
-                    <div className="flex justify-between text-white/60 font-semibold text-xs mt-1 sm:mt-2">
-                      {/* 旧: text-sm mt-3 */}
+                    <div className="flex justify-between text-white/70 font-bold text-sm mt-2 sm:mt-3">
                       <span>0</span>
                       <span>100</span>
                     </div>
@@ -340,7 +349,7 @@ export default function DiagnosisResults({
             </button>
 
             <button
-              onClick={() => window.history.back()}
+              onClick={() => window.location.href = '/'}
               className="w-full bg-gradient-to-r from-white/15 via-white/10 to-white/5 hover:from-white/25 hover:via-white/20 hover:to-white/15 backdrop-blur-sm text-white/90 font-medium py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl transition-all duration-300 border border-white/30 hover:border-white/50 drop-shadow text-sm sm:text-base"
             >
               ← トップに戻る

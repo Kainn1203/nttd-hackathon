@@ -603,28 +603,37 @@ export default function DiagnosisStart({
                     前回の診断結果
                   </h3>
 
-                  <div className="mt-2 sm:mt-3 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-sm sm:text-base">
-                    {/* 旧: mt-4 gap-3 text-lg */}
-                    <p className="text-white/80 drop-shadow-sm">
-                      <span className="font-medium text-white/90">
-                        タイプ：
+                  <div className="mt-2 sm:mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-sm sm:text-base">
+                    {/* タイプ - 最も強調 */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/25 shadow-lg">
+                      <span className="font-medium text-white/70 text-xs block mb-1 uppercase tracking-wider">
+                        Type
                       </span>
-                      {previousResult.diagnosis_result}
-                    </p>
-                    <p className="text-white/80 drop-shadow-sm">
-                      <span className="font-medium text-white/90">
-                        スコア：
+                      <span className="text-lg sm:text-xl font-bold text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        {previousResult.diagnosis_result}
                       </span>
-                      {previousResult.scores}点
-                    </p>
-                    <p className="text-white/80 drop-shadow-sm">
-                      <span className="font-medium text-white/90">
-                        診断日：
+                    </div>
+                    
+                    {/* スコア */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/25 shadow-lg">
+                      <span className="font-medium text-white/70 text-xs block mb-1">
+                        スコア
                       </span>
-                      {new Date(previousResult.created_at).toLocaleDateString(
-                        "ja-JP"
-                      )}
-                    </p>
+                      <span className="text-white font-bold text-base sm:text-lg drop-shadow-lg">
+                        {previousResult.scores}
+                        <span className="text-sm text-white/80 ml-1">点</span>
+                      </span>
+                    </div>
+                    
+                    {/* 診断日 */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/25 shadow-lg">
+                      <span className="font-medium text-white/70 text-xs block mb-1">
+                        診断日
+                      </span>
+                      <span className="text-white/90 font-semibold text-sm sm:text-base drop-shadow">
+                        {new Date(previousResult.created_at).toLocaleDateString("ja-JP")}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -730,12 +739,12 @@ export default function DiagnosisStart({
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-right">
                       <div className="text-xs text-white/80 font-medium mb-1 sm:mb-2">
-                        スコア: 0-15点
+                        スコア: 0-20点
                       </div>
                       <div className="w-full sm:w-28 bg-white/20 rounded-full h-2.5 border border-white/30 mx-auto sm:mx-0">
                         <div
                           className="bg-gradient-to-r from-green-300 to-green-400 h-2.5 rounded-full shadow-sm"
-                          style={{ width: "15%" }}
+                          style={{ width: "20%" }}
                         ></div>
                       </div>
                     </div>
@@ -764,12 +773,12 @@ export default function DiagnosisStart({
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-right">
                       <div className="text-xs text-white/80 font-medium mb-1 sm:mb-2">
-                        スコア: 16-35点
+                        スコア: 21-40点
                       </div>
                       <div className="w-full sm:w-28 bg-white/20 rounded-full h-2.5 border border-white/30 mx-auto sm:mx-0">
                         <div
                           className="bg-gradient-to-r from-blue-300 to-blue-400 h-2.5 rounded-full shadow-sm"
-                          style={{ width: "35%" }}
+                          style={{ width: "40%" }}
                         ></div>
                       </div>
                     </div>
@@ -798,12 +807,12 @@ export default function DiagnosisStart({
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-right">
                       <div className="text-xs text-white/80 font-medium mb-1 sm:mb-2">
-                        スコア: 36-55点
+                        スコア: 41-60点
                       </div>
                       <div className="w-full sm:w-28 bg-white/20 rounded-full h-2.5 border border-white/30 mx-auto sm:mx-0">
                         <div
                           className="bg-gradient-to-r from-yellow-300 to-yellow-400 h-2.5 rounded-full shadow-sm"
-                          style={{ width: "55%" }}
+                          style={{ width: "60%" }}
                         ></div>
                       </div>
                     </div>
@@ -832,12 +841,12 @@ export default function DiagnosisStart({
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-right">
                       <div className="text-xs text-white/80 font-medium mb-1 sm:mb-2">
-                        スコア: 56-75点
+                        スコア: 61-80点
                       </div>
                       <div className="w-full sm:w-28 bg-white/20 rounded-full h-2.5 border border-white/30 mx-auto sm:mx-0">
                         <div
                           className="bg-gradient-to-r from-orange-300 to-orange-400 h-2.5 rounded-full shadow-sm"
-                          style={{ width: "75%" }}
+                          style={{ width: "80%" }}
                         ></div>
                       </div>
                     </div>
@@ -866,7 +875,7 @@ export default function DiagnosisStart({
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-right">
                       <div className="text-xs text-white/80 font-medium mb-1 sm:mb-2">
-                        スコア: 76-100点
+                        スコア: 81-100点
                       </div>
                       <div className="w-full sm:w-28 bg-white/20 rounded-full h-2.5 border border-white/30 mx-auto sm:mx-0">
                         <div
