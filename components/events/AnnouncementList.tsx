@@ -97,7 +97,7 @@ export default function AnnouncementList({ eventId }: AnnouncementListProps) {
 
   if (announcements.length === 0) {
     return (
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, background: 'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)' }}>
         <CardContent>
           <Box sx={{ textAlign: "center", py: 2 }}>
             <Announcement
@@ -127,7 +127,12 @@ export default function AnnouncementList({ eventId }: AnnouncementListProps) {
         {announcements.map((announcement) => (
           <Card
             key={announcement.id}
-            sx={{ borderLeft: 4, borderLeftColor: "primary.main" }}
+            sx={{
+              borderLeft: 4,
+              borderLeftColor: "primary.main",
+              background:
+                'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)',
+            }}
           >
             <CardContent>
               <Box

@@ -218,7 +218,9 @@ export default function EventResults({
     const participantCount = event.members.length;
 
     return (
-      <Card>
+      <Card sx={{
+        background: 'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)'
+      }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             イベント確定済み
@@ -336,7 +338,9 @@ export default function EventResults({
 
   return (
     <>
-      <Card>
+      <Card sx={{
+        background: 'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)'
+      }}>
         <CardContent>
           <Box
             sx={{
@@ -518,7 +522,8 @@ export default function EventResults({
             })}
           </Box>
 
-          <Box sx={{ mt: 3, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
+          <Box sx={{ mt: 3, p: 2, borderRadius: 1, background:
+            'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)' }}>
             <Typography variant="body2" color="text.secondary">
               ヒートマップ: 参加可能な人数が多い候補日ほど濃い緑色で表示されます
             </Typography>

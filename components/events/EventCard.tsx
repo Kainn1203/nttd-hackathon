@@ -150,13 +150,15 @@ export default function EventCard({
       if (event.finalized_date) {
         return {
           border: "2px solid #bbf7d0",
-          background: "#fff",
+          background:
+            "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
         };
       } else {
         // isMember かつ finalized_date がない → 赤強調
         return {
           border: "2px solid #fecaca",
-          background: "#fff",
+          background:
+            "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
         };
       }
     } else {
@@ -170,7 +172,8 @@ export default function EventCard({
       } else {
         return {
           border: "1px solid #e5e7eb",
-          background: "#fff",
+          background:
+            "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
         };
       }
     }

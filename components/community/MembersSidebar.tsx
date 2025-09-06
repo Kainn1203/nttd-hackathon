@@ -15,16 +15,14 @@ import {
   Chip,
 } from "@mui/material";
 
-type MemberView = { id: number; name: string; avatarUrl?: string };
+type MemberView = { id: number; name: string; imageUrl?: string };
 
 export default function MembersSidebar({ members }: { members: MemberView[] }) {
   return (
     <Paper
       className="dark:invert"
       variant="outlined"
-      sx={{
-        p: 2,
-        borderRadius: 3,
+      sx={{ p: 2, borderRadius: 3, border: "1px solid #bfdbfe", background: "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
         position: { md: "sticky" }, // md以上で右カラムを固定
         top: { md: 16 }, // ヘッダ等があれば微調整
         display: "flex",
@@ -62,7 +60,7 @@ export default function MembersSidebar({ members }: { members: MemberView[] }) {
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               >
-                <Avatar src={m.avatarUrl} alt={m.name}>
+                <Avatar src={m.imageUrl} alt={m.name}>
                   {getInitials(m.name)}
                 </Avatar>
               </Badge>

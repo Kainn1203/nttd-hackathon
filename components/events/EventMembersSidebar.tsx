@@ -15,7 +15,7 @@ import {
   Chip,
 } from "@mui/material";
 
-type MemberView = { id: number; name: string; avatarUrl?: string };
+type MemberView = { id: number; name: string; imageUrl?: string };
 
 export default function EventMembersSidebar({
   members,
@@ -35,6 +35,8 @@ export default function EventMembersSidebar({
         flexDirection: "column",
         // 画面高にフィットして内部スクロール
         maxHeight: { xs: "none", md: "calc(100vh - 32px)" },
+        background:
+          'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)',
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>
@@ -66,7 +68,7 @@ export default function EventMembersSidebar({
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               >
-                <Avatar src={m.avatarUrl} alt={m.name}>
+                <Avatar src={m.imageUrl} alt={m.name}>
                   {getInitials(m.name)}
                 </Avatar>
               </Badge>

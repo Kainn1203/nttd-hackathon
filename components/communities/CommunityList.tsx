@@ -90,7 +90,9 @@ export default function CommunityList({
     // UI
     <div className="space-y-6">
       {/* Search and Filter Controls */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="rounded-2xl border border-blue-200 shadow-sm p-6"
+     style={{ background: "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)" }}>
+
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Search */}
           <div className="flex-1 max-w-md">
@@ -181,7 +183,7 @@ export default function CommunityList({
       {/* 条件分岐表示部分 */}
       {hasNoCommunities ? (
         // コミュニティが全く存在しない場合
-        <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+        <div className="text-center py-16 bg-white rounded-lg border border-gray-300 shadow-sm">
           <div className="text-6xl mb-4">🌟</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             まだコミュニティがありません
@@ -189,13 +191,13 @@ export default function CommunityList({
           <p className="text-gray-600 mb-6">
             新しいコミュニティを作成して、最初のメンバーになりましょう！
           </p>
-          <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-lg inline-block">
+          <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg inline-block">
             💡 ヒント: 上の「+ 新しいコミュニティを作成」ボタンから始められます
           </div>
         </div>
       ) : isEmpty ? (
         // フィルター結果が空の場合
-        <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+        <div className="text-center py-16 bg-white rounded-lg border border-gray-300 shadow-sm">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             検索結果が見つかりません

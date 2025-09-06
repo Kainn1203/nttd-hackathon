@@ -312,7 +312,7 @@ export default function EventsClient({
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "transparent", py: 4 }}>
       <Container maxWidth="lg">
         <Box
           mb={4}

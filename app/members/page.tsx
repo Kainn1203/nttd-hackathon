@@ -87,7 +87,7 @@ export default async function MemberPage() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "transparent", py: 4 }}>
       <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3 }}>
         <Typography variant="h4" fontWeight="bold" mb={4}>
           内定者一覧
