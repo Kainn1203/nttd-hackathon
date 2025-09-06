@@ -35,68 +35,64 @@ interface MemberCardProps {
 interface Diagnosis {
   label: string;
   image: string | null;
+  bgcolor: string;
+  bodercolor: string;
 }
 
-const getBackgroundColor = (score: number | null): string => {
-  if (score === null) return "#ffffff"; // 白
-  if (score <= 20) return "#FFF9FA"; // 赤系
-  if (score <= 40) return "#F6FCFD"; // 青系
-  if (score <= 60) return "#FFFDF5"; // 黄系
-  if (score <= 80) return "#F8FCF9"; // 緑系
-  return "#FBF9FF"; // 紫系
-};
-
-const getBorderColor = (score: number | null): string => {
-  if (score === null) return "#ffffff"; // 白
-  if (score <= 20) return "#CC4B68"; // 赤系
-  if (score <= 40) return "#007B8A"; // 青系
-  if (score <= 60) return "#E6A700"; // 黄系
-  if (score <= 80) return "#2F6B3D"; // 緑系
-  return "#6A4FB6"; // 紫系
-};
-
 // スコアに応じた診断結果を返す関数
-function getDiagnosis(score: number | null): Diagnosis {
-  if (score === null) {
-    return { label: "診断結果がありません", image: null };
-  }
-  if (score <= 20) {
+function getDiagnosis(name: string | null): Diagnosis {
+  if (name) {
+    if (name.includes("ゆる")) {
+      return {
+        label: "ゆるふわ KAIWAI",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+        bgcolor: "#FFF9FA",
+        bodercolor: "#CC4B68",
+      };
+    } else if (name.includes("定時")) {
+      return {
+        label: "今日、定時に恋しました。",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
+        bgcolor: "#F6FCFD",
+        bodercolor: "#007B8A",
+      };
+    } else if (name.includes("タイパ")) {
+      return {
+        label: "タイパ重視",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
+        bgcolor: "#FFFDF5",
+        bodercolor: "#E6A700",
+      };
+    } else if (name.includes("残業するのは")) {
+      return {
+        label: "残業するのは、ダメですか？",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
+        bgcolor: "#F8FCF9",
+        bodercolor: "#2F6B3D",
+      };
+    } else
+      return {
+        label: "残業が尊い….！",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
+        bgcolor: "#FBF9FF",
+        bodercolor: "#6A4FB6",
+      };
+  } else
     return {
-      label: "ゆるふわ KAIWAI",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+      label: "診断結果がありません",
+      image: null,
+      bgcolor: "#ffffff",
+      bodercolor: "#ffffff",
     };
-  }
-  if (score <= 40) {
-    return {
-      label: "今日、定時に恋しました。",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
-    };
-  }
-  if (score <= 60) {
-    return {
-      label: "タイパ重視",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
-    };
-  }
-  if (score <= 80) {
-    return {
-      label: "残業するのは、ダメですか？",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
-    };
-  }
-  return {
-    label: "残業が尊い….！",
-    image:
-      "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
-  };
 }
 
 const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
-  const diagnosis = getDiagnosis(member.scores);
+  const diagnosis = getDiagnosis(member.diagnosis_result);
   return (
     <Card
       onClick={onClick}
@@ -110,8 +106,8 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
         cursor: "pointer",
         transition: "0.2s",
         "&:hover": { boxShadow: 6 },
-        backgroundColor: getBackgroundColor(member.scores),
-        border: `2px solid ${getBorderColor(member.scores)}`,
+        backgroundColor: getDiagnosis(member.diagnosis_result).bgcolor,
+        border: `2px solid ${getDiagnosis(member.diagnosis_result).bodercolor}`,
         position: "relative",
       }}
     >

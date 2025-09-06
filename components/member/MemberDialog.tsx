@@ -45,65 +45,61 @@ interface MemberDialogProps {
 interface Diagnosis {
   label: string;
   image: string | null;
+  bgcolor: string;
+  bodercolor: string;
 }
 
 // スコアに応じた診断結果を返す関数
-function getDiagnosis(score: number | null): Diagnosis {
-  if (score === null) {
-    return { label: "診断結果がありません", image: null };
-  }
-  if (score <= 20) {
+function getDiagnosis(name: string | null): Diagnosis {
+  if (name) {
+    if (name.includes("ゆる")) {
+      return {
+        label: "ゆるふわ KAIWAI",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+        bgcolor: "#FFE4E7",
+        bodercolor: "#CC4B68",
+      };
+    } else if (name.includes("定時")) {
+      return {
+        label: "今日、定時に恋しました。",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
+        bgcolor: "#E0F7F9",
+        bodercolor: "#007B8A",
+      };
+    } else if (name.includes("タイパ")) {
+      return {
+        label: "タイパ重視",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
+        bgcolor: "#FFF4CC",
+        bodercolor: "#E6A700",
+      };
+    } else if (name.includes("残業するのは")) {
+      return {
+        label: "残業するのは、ダメですか？",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
+        bgcolor: "#EAF7EC",
+        bodercolor: "#2F6B3D",
+      };
+    } else
+      return {
+        label: "残業が尊い….！",
+        image:
+          "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
+        bgcolor: "#F0E9FF",
+        bodercolor: "#6A4FB6",
+      };
+  } else
     return {
-      label: "ゆるふわ KAIWAI",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+      label: "診断結果がありません",
+      image: null,
+      bgcolor: "#ffffff",
+      bodercolor: "#ffffff",
     };
-  }
-  if (score <= 40) {
-    return {
-      label: "今日、定時に恋しました。",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
-    };
-  }
-  if (score <= 60) {
-    return {
-      label: "タイパ重視",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
-    };
-  }
-  if (score <= 80) {
-    return {
-      label: "残業するのは、ダメですか？",
-      image:
-        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
-    };
-  }
-  return {
-    label: "残業が尊い….！",
-    image:
-      "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
-  };
 }
-
-const getBorderColor = (score: number | null): string => {
-  if (score === null) return "#ffffff"; // 白
-  if (score <= 20) return "#CC4B68"; // 赤系
-  if (score <= 40) return "#007B8A"; // 青系
-  if (score <= 60) return "#E6A700"; // 黄系
-  if (score <= 80) return "#2F6B3D"; // 緑系
-  return "#6A4FB6"; // 紫系
-};
-
-const getBackgroundColor = (score: number | null): string => {
-  if (score === null) return "#ffffff"; // 白
-  if (score <= 20) return "#FFE4E7"; // 赤系
-  if (score <= 40) return "#E0F7F9"; // 青系
-  if (score <= 60) return "#FFF4CC"; // 黄系
-  if (score <= 80) return "#EAF7EC"; // 緑系
-  return "#F0E9FF"; // 紫系
-};
 
 export default function MemberDialog({
   open,
@@ -112,7 +108,7 @@ export default function MemberDialog({
 }: MemberDialogProps) {
   if (!member) return null;
 
-  const diagnosis = getDiagnosis(member.scores);
+  const diagnosis = getDiagnosis(member.diagnosis_result);
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -209,7 +205,7 @@ export default function MemberDialog({
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  bgcolor: getBackgroundColor(member.scores),
+                  bgcolor: getDiagnosis(member.diagnosis_result).bgcolor,
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
@@ -224,7 +220,9 @@ export default function MemberDialog({
                     sx={{
                       width: 80,
                       height: 80,
-                      border: `2px solid ${getBorderColor(member.scores)}`,
+                      border: `2px solid ${
+                        getDiagnosis(member.diagnosis_result).bodercolor
+                      }`,
                     }}
                   />
                 )}

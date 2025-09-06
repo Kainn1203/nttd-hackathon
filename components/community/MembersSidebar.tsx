@@ -15,7 +15,7 @@ import {
   Chip,
 } from "@mui/material";
 
-type MemberView = { id: number; name: string; avatarUrl?: string };
+type MemberView = { id: number; name: string; imageUrl?: string };
 
 export default function MembersSidebar({ members }: { members: MemberView[] }) {
   return (
@@ -62,7 +62,7 @@ export default function MembersSidebar({ members }: { members: MemberView[] }) {
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               >
-                <Avatar src={m.avatarUrl} alt={m.name}>
+                <Avatar src={m.imageUrl} alt={m.name}>
                   {getInitials(m.name)}
                 </Avatar>
               </Badge>
