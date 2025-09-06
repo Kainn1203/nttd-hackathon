@@ -1,5 +1,5 @@
-// import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -40,6 +40,31 @@ export async function GET(req: Request) {
   const userToken = json.authed_user?.access_token as string | undefined;
   if (!userToken) return new Response("no user token", { status: 500 });
 
+  // (4) Slackユーザー情報を取得
+  const userInfoRes = await fetch("https://slack.com/api/users.identity", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+  const userInfo = await userInfoRes.json();
+
+  if (userInfo.ok && userInfo.user?.id) {
+    // (5) 現在のユーザーを取得
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      // (6) データベースにslack_user_idを保存
+      await supabase
+        .from("user")
+        .update({ slack_user_id: userInfo.user.id })
+        .eq("id", user.id);
+    }
+  }
+
   // ★ 相対リダイレクト + Set-Cookie を複数付与
   const headers = new Headers();
   headers.append(
@@ -54,6 +79,7 @@ export async function GET(req: Request) {
     "Set-Cookie",
     "slack_oauth_return_to=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"
   );
+
   headers.append("Location", returnTo); // 例: "/communities/1"（相対パス！）
 
   return new Response(null, { status: 302, headers });

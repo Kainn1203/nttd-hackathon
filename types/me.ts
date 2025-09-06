@@ -1,3 +1,5 @@
+// types\me.ts
+
 export type Me = {
   id: number; // 内定者ID
   authId: string; // SupabaseのUUID（内部処理用）
