@@ -14,12 +14,17 @@ interface Member {
   id: number;
   last_name: string;
   first_name: string;
+  hobby: string[];
+  hobbyIds: number[];
+  university: string;
+  image_path?: string | null;
   last_name_katakana: string;
   first_name_katakana: string;
   handle_name: string;
   origin: string;
-  hobby: string[];
-  image_path: string | null;
+  pr: string;
+  scores: number;
+  diagnosis_result: string;
 }
 
 interface MemberCardProps {
@@ -27,7 +32,71 @@ interface MemberCardProps {
   onClick: () => void;
 }
 
+interface Diagnosis {
+  label: string;
+  image: string | null;
+}
+
+const getBackgroundColor = (score: number | null): string => {
+  if (score === null) return "#ffffff"; // 白
+  if (score <= 20) return "#FFF9FA"; // 赤系
+  if (score <= 40) return "#F6FCFD"; // 青系
+  if (score <= 60) return "#FFFDF5"; // 黄系
+  if (score <= 80) return "#F8FCF9"; // 緑系
+  return "#FBF9FF"; // 紫系
+};
+
+const getBorderColor = (score: number | null): string => {
+  if (score === null) return "#ffffff"; // 白
+  if (score <= 20) return "#CC4B68"; // 赤系
+  if (score <= 40) return "#007B8A"; // 青系
+  if (score <= 60) return "#E6A700"; // 黄系
+  if (score <= 80) return "#2F6B3D"; // 緑系
+  return "#6A4FB6"; // 紫系
+};
+
+// スコアに応じた診断結果を返す関数
+function getDiagnosis(score: number | null): Diagnosis {
+  if (score === null) {
+    return { label: "診断結果がありません", image: null };
+  }
+  if (score <= 20) {
+    return {
+      label: "ゆるふわ KAIWAI",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/a.png",
+    };
+  }
+  if (score <= 40) {
+    return {
+      label: "今日、定時に恋しました。",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/b.png",
+    };
+  }
+  if (score <= 60) {
+    return {
+      label: "タイパ重視",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/c.png",
+    };
+  }
+  if (score <= 80) {
+    return {
+      label: "残業するのは、ダメですか？",
+      image:
+        "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/d.png",
+    };
+  }
+  return {
+    label: "残業が尊い….！",
+    image:
+      "https://dxzemwwaldgwnjkviyfn.supabase.co/storage/v1/object/public/diagnosis_images/e.png",
+  };
+}
+
 const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
+  const diagnosis = getDiagnosis(member.scores);
   return (
     <Card
       onClick={onClick}
@@ -40,12 +109,40 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
         cursor: "pointer",
         transition: "0.2s",
         "&:hover": { boxShadow: 6 },
+        backgroundColor: getBackgroundColor(member.scores),
+        border: `2px solid ${getBorderColor(member.scores)}`,
+        position: "relative",
       }}
     >
+      {/* 左上に重ねて表示 */}
+      {member.diagnosis_result && (
+        <Box
+          component="img"
+          src={diagnosis.image}
+          alt={diagnosis.label}
+          sx={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            width: 40,
+            height: 40,
+            objectFit: "contain",
+            zIndex: 2,
+          }}
+        />
+      )}
+
       <CardContent sx={{ textAlign: "center", overflow: "hidden" }}>
         <Avatar
           src={member.image_path}
-          sx={{ width: 96, height: 96, mx: "auto", mb: 2 }}
+          sx={{
+            width: 96,
+            height: 96,
+            mx: "auto",
+            mb: 2,
+            border: "2px solid #eee",
+            boxShadow: 2,
+          }}
         />
         <Typography variant="caption" fontWeight="text">
           {member.last_name_katakana} {member.first_name_katakana}
@@ -59,13 +156,14 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {member.origin} {"出身"}
         </Typography>
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 1,
+        <div
+          style={{
+            display: "inline-block",
+            maxWidth: "100%",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            verticalAlign: "middle",
           }}
         >
           {member.hobby.map((hobby, i) => (
@@ -74,9 +172,14 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, onClick }) => {
               label={"#" + hobby}
               variant="outlined"
               color="primary"
+              sx={{
+                backgroundColor: "white",
+                flexShrink: 0,
+                mr: 1,
+              }}
             />
           ))}
-        </Box>
+        </div>
       </CardContent>
     </Card>
   );
