@@ -343,7 +343,7 @@ export default function CommunitiesClient({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <div className="text-xl text-gray-600">読み込み中．．．</div>
@@ -354,7 +354,7 @@ export default function CommunitiesClient({
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">エラーが発生しました．</div>
           <div className="text-gray-600 mb-6">{error}</div>
@@ -370,7 +370,7 @@ export default function CommunitiesClient({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-transparent py-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
