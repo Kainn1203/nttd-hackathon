@@ -3,7 +3,6 @@ export type Event = {
   name: string;
   description: string | null;
   owner_id: number;
-  image_path: string | null;
   location: string | null;
   deadline: string;
   max_participants: number;
@@ -57,3 +56,15 @@ export type EventAnnouncement = {
   description: string;
   created_at: string;
 };
+
+// types/event.ts
+export interface NewEventForm {
+  name: string;
+  description: string;
+  location: string;
+  deadline: Date | null;
+  max_participants: number | null;
+  // start_date: Date | null;
+  // end_date: Date | null;
+  candidate_dates: Date[];
+}
