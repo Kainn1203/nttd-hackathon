@@ -1,6 +1,8 @@
 'use client'
 
+
 import React, { useState, useEffect } from 'react'
+
 
 interface DiagnosisFormProps {
   userName: string
@@ -9,11 +11,13 @@ interface DiagnosisFormProps {
   onBack: () => void
 }
 
+
 export default function DiagnosisForm({ userName, userId, onComplete, onBack }: DiagnosisFormProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<{[key: number]: 1|2|3}>({})
   const [loading, setLoading] = useState(false)
   const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([])
+
 
   // Fisher-Yates シャッフルアルゴリズム
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -24,6 +28,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
     }
     return shuffled
   }
+
 
   // 質問データ
   const questions = [
@@ -119,6 +124,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
     }
   ];
 
+
   // コンポーネント初期化時に選択肢をシャッフル
   useEffect(() => {
     const questionsWithShuffledOptions = questions.map(question => ({
@@ -126,11 +132,13 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
       options: shuffleArray(question.options)
     }))
     setShuffledQuestions(questionsWithShuffledOptions)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
 
   const handleAnswer = async (questionIndex: number, answerValue: 1|2|3) => {
     setAnswers(prev => ({ ...prev, [questionIndex]: answerValue }))
-    
+   
     if (questionIndex < questions.length - 1) {
       setTimeout(() => setCurrentQuestion(questionIndex + 1), 300)
     } else {
@@ -138,12 +146,14 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
     }
   }
 
+
   const completeDiagnosis = async (finalAnswer: 1|2|3) => {
     setLoading(true)
-    
+   
     try {
       const allAnswers = { ...answers, [currentQuestion]: finalAnswer }
       const answersArray: (1|2|3)[] = Array.from({ length: 10 }, (_, i) => allAnswers[i])
+
 
       const response = await fetch('/api/corporate_diagnosis/diagnosis', {
         method: 'POST',
@@ -156,10 +166,12 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
         })
       })
 
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || '診断の保存に失敗しました')
       }
+
 
       const result = await response.json()
       onComplete({
@@ -167,14 +179,15 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
         result,
         answers: allAnswers
       })
-      
-    } catch (error) {
+     
+    } catch (error: any) {
       console.error('診断完了処理エラー:', error)
       alert(`診断結果の保存に失敗しました: ${error.message}`)
     } finally {
       setLoading(false)
     }
   }
+
 
   if (loading) {
     return (
@@ -185,7 +198,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
           <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-gradient-to-br from-white/20 to-cyan-200/30 transform rotate-45 blur-xl"></div>
           <div className="absolute -bottom-1/3 -left-1/4 w-0 h-0 border-l-[200px] border-r-[200px] border-b-[300px] border-l-transparent border-r-transparent border-b-purple-200/40 transform rotate-12 blur-2xl"></div>
         </div>
-        
+       
         <div className="bg-gradient-to-br from-white/20 via-cyan-50/15 to-sky-100/10 backdrop-blur-2xl rounded-3xl shadow-lg p-8 text-center border border-white/30 relative z-10">
           <div className="animate-spin rounded-full h-12 w-12 border-3 border-white border-t-transparent mx-auto mb-4"></div>
           <p className="text-white/90 font-medium drop-shadow">診断結果を計算中...</p>
@@ -193,6 +206,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
       </div>
     )
   }
+
 
   if (shuffledQuestions.length === 0) {
     return (
@@ -205,7 +219,9 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
     )
   }
 
+
   const progress = ((currentQuestion + 1) / questions.length) * 100
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-300 via-sky-200 to-purple-300 relative overflow-hidden">
@@ -214,7 +230,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
         <div className="absolute -top-1/3 -right-1/4 w-full h-4/5 bg-gradient-to-br from-cyan-200/50 to-sky-300/30 rounded-full transform scale-200 blur-2xl"></div>
         <div className="absolute top-1/4 -left-1/3 w-3/4 h-3/4 bg-gradient-to-tr from-sky-100/40 to-cyan-200/25 rounded-full transform scale-150 blur-2xl"></div>
         <div className="absolute -bottom-1/4 right-1/4 w-2/3 h-2/3 bg-gradient-to-tl from-purple-200/45 to-pink-200/30 rounded-full transform scale-110 blur-xl"></div>
-        
+       
         {/* 線的要素 */}
         <div className="absolute top-10 left-10 w-60 h-0.5 bg-white/50 rotate-[20deg]"></div>
         <div className="absolute top-20 left-20 w-100 h-0.5 bg-white/50 rotate-45"></div>
@@ -222,77 +238,71 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
         <div className="absolute bottom-60 left-1/3 w-40 h-0.5 bg-white/50 rotate-30"></div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
-        <div className="bg-gradient-to-br from-sky-300/60 via-purple-400/50 to-pink-500/60 backdrop-blur-xl rounded-3xl shadow-lg border border-white/25 p-8">
-          
+
+      {/* ▼▼ ここから“カードが大きい”対策（サイズのみ最小変更） ▼▼ */}
+      <div className="max-w-2xl mx-auto px-4 py-6 relative z-10">{/* 旧: max-w-4xl px-6 py-12 */}
+        <div className="bg-gradient-to-br from-sky-300/60 via-purple-400/50 to-pink-500/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/25 p-6">{/* 旧: rounded-3xl p-8 */}
           {/* ヘッダー */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <button
-                onClick={onBack}
-                className="text-white/80 hover:text-white text-lg font-semibold  drop-shadow transition-all duration-200 hover:scale-105"
-              >
-                ← 戻る
-              </button>
-              <h2 className="text-2xl font-light text-white/90 drop-shadow-lg">
-                質問 {currentQuestion + 1} / {questions.length}
-              </h2>
-              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
-                <span className="text-white/90 font-medium drop-shadow">
-                  {userName}さん
-                </span>
-              </div>
-            </div>
-            
-            {/* プログレスバー */}
-            <div className="w-full bg-white/20 rounded-full h-4 mb-3 border border-white/30">
-              <div 
-                className="bg-gradient-to-r from-cyan-400 to-purple-500 h-4 rounded-full transition-all duration-500 shadow-sm"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <div className="text-right font-semibold text-white/80 font-medium drop-shadow">
-              {Math.round(progress)}% 完了
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={onBack}
+              className="text-white/90 hover:text-white text-base font-semibold drop-shadow transition-all duration-200 hover:scale-105">{/* 旧: text-lg font-semibold */}
+              ← 戻る
+            </button>
+            <h2 className="text-xl font-semibold text-white/90 drop-shadow-lg">{/* 旧: text-2xl */}
+              質問 {currentQuestion + 1} / {questions.length}
+            </h2>
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">{/* 旧: px-4 py-2 */}
+              <span className="text-white/90 font-semibold drop-shadow">
+                {userName}さん
+              </span>
             </div>
           </div>
+         
+          {/* プログレスバー */}
+          <div className="w-full bg-white/20 rounded-full h-3 border border-white/30">{/* 旧: h-4 */}
+            <div
+              className="bg-gradient-to-r from-cyan-400 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <div className="text-right font-semibold text-white/80 text-sm drop-shadow">{/* 旧: text-base */}
+            {Math.round(progress)}% 完了
+          </div>
+
 
           {/* 質問部分 */}
-          <div className="mb-8">
+          <div className="mb-4">
             <div className="text-center mb-8">
-              <div className="text-6xl mb-6 drop-shadow-lg">
+              <div className="text-4xl mb-4 drop-shadow-lg">{/* 旧: text-6xl */}
                 {['💼', '🍻', '👥', '😴', '⏰', '💭', '👥', '⚖️', '🚀', '📱'][currentQuestion]}
               </div>
-              
-              <h3 className="text-3xl font-light text-white/95 mb-12 leading-relaxed drop-shadow-lg max-w-3xl mx-auto">
+              <h3 className="text-2xl font-semibold text-white/95 leading-relaxed drop-shadow-lg max-w-xl mx-auto">{/* 旧: text-3xl */}
                 {shuffledQuestions[currentQuestion].text}
               </h3>
             </div>
-            
-            <div className="space-y-4 max-w-3xl mx-auto">
-              {shuffledQuestions[currentQuestion].options.map((option, index) => (
-                <button
-                  key={`${currentQuestion}-${index}`}
-                  onClick={() => handleAnswer(currentQuestion, option.value)}
-                  className="w-full p-6 text-left bg-gradient-to-r from-white/15 via-white/10 to-white/5 hover:from-white/25 hover:via-white/20 hover:to-white/15 backdrop-blur-sm border border-white/30 hover:border-white/50 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-1"
-                >
-                  <div className="flex items-center">
-                    <span className="bg-white/80 text-purple-600 rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-6 shadow-md">
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <span className="font-medium text-white/90 text-xl drop-shadow-sm">
-                      {option.text}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="text-center font-semibold text-white/70 drop-shadow-sm">
-            答えを選択すると自動的に次の質問に進みます
+
+            {/* 選択肢 */}
+            <div className="space-y-3">
+              {shuffledQuestions[currentQuestion].options.map(
+                (opt: { text: string; value: 1|2|3 }, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleAnswer(currentQuestion, opt.value)}
+                    className="w-full text-left bg-white/20 hover:bg-white/30 active:bg-white/40 border border-white/30 rounded-xl px-4 py-3 transition-all duration-150 backdrop-blur drop-shadow-sm"
+                  >
+                    <span className="text-white/95">{opt.text}</span>
+                   
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
       </div>
+      {/* ▲▲ サイズのみ最小変更ここまで ▲▲ */}
     </div>
   )
 }
+

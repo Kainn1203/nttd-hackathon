@@ -121,10 +121,10 @@ export default function DiagnosisResults({ userName, result, onRestart }: Diagno
           
           {/* ヘッダー */}
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-extralight text-white mb-6 tracking-wide drop-shadow-2xl">
+            <h1 className="text-5xl font-semibold text-white mb-6 tracking-wide drop-shadow-2xl">
               診断結果
             </h1>
-            <p className="text-xl text-white/90 drop-shadow-lg">
+            <p className="text-xl font-semibold text-white/90 drop-shadow-lg">
               {userName}さんの社畜診断が完了しました！
             </p>
             <p className="text-white/90 font-semibold mt-3 drop-shadow">
