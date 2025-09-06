@@ -19,3 +19,4 @@ export async function POST(req: Request) {
     ? Response.json(json)
     : new Response(JSON.stringify(json), { status: 400 });
 }
+import "@/lib/proxy";

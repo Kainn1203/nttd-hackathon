@@ -48,7 +48,6 @@ export default async function Community(props: {
     return notFound();
   }
 
-  const imageUrl = data.image_path;
   const channelId = data.slack_channel_id;
   const cookieStore = await cookies();
   const hasSlackAuth = !!cookieStore.get("slack_user_token")?.value;
