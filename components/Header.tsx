@@ -25,13 +25,14 @@ import PersonIcon from "@mui/icons-material/Person";
 const nav = [
   { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
+  { href: "/events", label: "イベント", icon: <ForumIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
 ];
 
 export default function Header() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname() ?? "/";
-  // 絶対パスで遷移させる（/communities/members にならないように）
+  // 絶対パスで遷移
   const ichiranHref = "/members";
 
   return (
@@ -68,10 +69,9 @@ export default function Header() {
                 width: "100%",
               }}
             >
-              {nav.map((n) => {
+              {nav.filter(n => n.label !== "マイページ").map((n) => {
                 const targetHref = n.label === "内定者一覧" ? ichiranHref : n.href;
-                const isActive =
-                  pathname === n.href || pathname.startsWith(`${n.href}/`);
+                const isActive = pathname === n.href || pathname.startsWith(`${n.href}/`);
                 return (
                   <Button
                     key={n.href}
@@ -88,15 +88,38 @@ export default function Header() {
                       fontWeight: 700,
                       borderRadius: 1,
                       backgroundColor: isActive ? "action.selected" : "transparent",
-                      "&:hover": {
-                        backgroundColor: "action.hover",
-                      },
+                      "&:hover": { backgroundColor: "action.hover" },
                     }}
                   >
                     {n.label}
                   </Button>
                 );
               })}
+            <Box sx={{ ml: 1 }}>
+              {(() => {
+                const n = nav.find(v => v.label === "マイページ");
+                const isActive = pathname === n?.href || pathname.startsWith(`${n?.href}/`);
+                return (
+                  <Button
+                    component={Link}
+                    href={n?.href || "/myPage"}
+                    startIcon={<PersonIcon />}
+                    size="small"
+                    color="primary"
+                    sx={{
+                      fontWeight: 700,
+                      borderRadius: 1,
+                      whiteSpace: 'nowrap',
+                      px: 2,
+                      backgroundColor: isActive ? "action.selected" : "transparent",
+                      "&:hover": { backgroundColor: "action.hover" },
+                    }}
+                  >
+                    マイページ
+                  </Button>
+                );
+              })()}
+            </Box>
             </Box>
           </Box>
 

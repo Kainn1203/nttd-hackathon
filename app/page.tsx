@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/me";
 import { getPublicImageUrl } from "@/lib/supabase/image";
+import { createClient } from "@/lib/supabase/server";
 
 import {
   Box,
@@ -13,7 +14,8 @@ import {
   CardContent,
   Container,
   Divider,
-  Grid,
+  Alert,
+  Chip,
   Stack,
   Typography,
 } from "@mui/material";
@@ -21,16 +23,33 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
 import ForumIcon from "@mui/icons-material/Forum";
 
+export const metadata = { title: "NTTデータ内定者向けコミュニティ" };
+
 export default async function Home() {
   const me = await getMe();
   if (!me) redirect("/login");
-  // DBにフルURLが保存されている場合はそのまま使い、
-  // パスのみの場合は公開URLに変換
+  // 画像URL（フルURL or パス対応）
   let avatarUrl: string | undefined = undefined;
   if (me?.imagePath) {
     avatarUrl = me.imagePath.startsWith("http")
       ? me.imagePath
       : getPublicImageUrl("user-images", me.imagePath) ?? undefined;
+  }
+  // ユーザーの趣味（名前配列）
+  const supabase = await createClient();
+  const { data: userHobby } = await supabase
+    .from("user_hobbies")
+    .select("hobby_id")
+    .eq("user_id", me.id)
+    .order("hobby_id");
+  let hobbyNames: string[] = [];
+  if (userHobby && userHobby.length > 0) {
+    const ids = userHobby.map((h: { hobby_id: number }) => h.hobby_id);
+    const { data: hobbies } = await supabase
+      .from("hobbies")
+      .select("id, hobby")
+      .in("id", ids);
+    hobbyNames = (hobbies ?? []).map((h: { id: number; hobby: string }) => h.hobby);
   }
 
   return (
@@ -76,30 +95,30 @@ export default async function Home() {
         </Container>
       </Box>
 
-      {/* コンテンツ：カードを1行3枚で揃える（空白を減らす） */}
-      <Container
-        maxWidth="lg"
-        disableGutters
-        sx={{ pb: { xs: 6, md: 8 }, px: { xs: 0, sm: 3 } }}
-      >
-        <Grid
-          container
-          rowSpacing={{ xs: 2, md: 3 }}
-          columnSpacing={{ xs: 0, md: 3 }}
+      {/* お知らせ（DB連携なしのシンプル表示） */}
+      <Container maxWidth="lg" disableGutters sx={{ px: { xs: 0, sm: 3 }, mb: 2 }}>
+        <Alert severity="info" variant="outlined" sx={{ borderRadius: 2, whiteSpace: 'pre-wrap' }}>
+          {process.env.NEXT_PUBLIC_NOTICE_MESSAGE ?? "現在お知らせはありません"}
+        </Alert>
+      </Container>
+
+      {/* コンテンツ：BoxのCSS Gridでレイアウト */}
+      <Container maxWidth="lg" disableGutters sx={{ pb: { xs: 6, md: 8 }, px: { xs: 0, sm: 3 } }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            columnGap: { xs: 0, md: 3 },
+            rowGap: { xs: 2, md: 3 },
+          }}
         >
-          <Grid xs={12} md={6}>
+          <Box>
             <Card sx={{ height: "100%" }}>
-              <CardActionArea
-                component={Link}
-                href="/members"
-                aria-label="内定者一覧ページへ移動"
-              >
+              <CardActionArea component={Link} href="/members" aria-label="内定者一覧ページへ移動">
                 <CardContent sx={{ p: 3 }}>
                   <Stack spacing={1.5}>
                     <GroupsIcon fontSize="large" color="primary" />
-                    <Typography variant="h6" fontWeight={800}>
-                      内定者一覧
-                    </Typography>
+                    <Typography variant="h6" fontWeight={800}>内定者一覧</Typography>
                     <Typography variant="body2" color="text.secondary">
                       学部・興味・スキルで検索。つながりを見つけよう。
                     </Typography>
@@ -107,20 +126,14 @@ export default async function Home() {
                 </CardContent>
               </CardActionArea>
             </Card>
-          </Grid>
-          <Grid xs={12} md={6}>
+          </Box>
+          <Box>
             <Card sx={{ height: "100%" }}>
-              <CardActionArea
-                component={Link}
-                href="/communities"
-                aria-label="コミュニティページへ移動"
-              >
+              <CardActionArea component={Link} href="/communities" aria-label="コミュニティページへ移動">
                 <CardContent sx={{ p: 3 }}>
                   <Stack spacing={1.5}>
                     <ForumIcon fontSize="large" color="primary" />
-                    <Typography variant="h6" fontWeight={800}>
-                      コミュニティ
-                    </Typography>
+                    <Typography variant="h6" fontWeight={800}>コミュニティ</Typography>
                     <Typography variant="body2" color="text.secondary">
                       サークル・PJ・勉強会など、興味ある場に参加しよう。
                     </Typography>
@@ -128,58 +141,42 @@ export default async function Home() {
                 </CardContent>
               </CardActionArea>
             </Card>
-          </Grid>
+          </Box>
 
           {/* あなたのプロフィール（2段目・1行で配置） */}
-          <Grid xs={12}>
+          <Box sx={{ gridColumn: { xs: "1", md: "1 / -1" } }}>
             <Card>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  あなたのプロフィール
-                </Typography>
+                <Typography variant="subtitle2" color="text.secondary">あなたのプロフィール</Typography>
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 0.5 }}>
                   <Avatar src={avatarUrl} alt={me.name ?? "プロフィール"} sx={{ width: 40, height: 40 }} />
-                  <Typography variant="h6" fontWeight={800}>
-                    {me.name ?? "未設定"}
-                  </Typography>
+                  <Typography variant="h6" fontWeight={800}>{me.name ?? "未設定"}</Typography>
                 </Stack>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack spacing={0.5}>
-                  <Typography variant="body2">
-                    <strong>ID:</strong> {me.id}
-                  </Typography>
+                  <Typography variant="body2"><strong>ID:</strong> {me.id}</Typography>
                   {me?.handleName && (
-                    <Typography variant="body2">
-                      <strong>ハンドルネーム:</strong> {me.handleName}
-                    </Typography>
+                    <Typography variant="body2"><strong>ハンドルネーム:</strong> {me.handleName}</Typography>
                   )}
-                  {me?.origin && (
-                    <Typography variant="body2">
-                      <strong>出身:</strong> {me.origin}
-                    </Typography>
+                  <Typography variant="body2"><strong>出身:</strong> {me?.origin || "未設定"}</Typography>
+                  {me?.university && (
+                    <Typography variant="body2"><strong>大学:</strong> {me.university}</Typography>
                   )}
                 </Stack>
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ mt: 2 }}
-                  useFlexGap
-                  flexWrap="wrap"
-                >
-                  <Button
-                    component={Link}
-                    href="/myPage"
-                    size="small"
-                    variant="outlined"
-                    startIcon={<PersonIcon />}
-                  >
-                    プロフィールを編集
-                  </Button>
+                {hobbyNames.length > 0 && (
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+                    {hobbyNames.map((name) => (
+                      <Chip key={name} label={name} size="small" />
+                    ))}
+                  </Stack>
+                )}
+                <Stack direction="row" spacing={1.5} sx={{ mt: 2 }} useFlexGap flexWrap="wrap">
+                  <Button component={Link} href="/myPage" size="small" variant="outlined" startIcon={<PersonIcon />}>プロフィールを編集</Button>
                 </Stack>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </main>
   );
