@@ -171,7 +171,7 @@ export default async function Home() {
           icon={false}
           severity="info"
           variant="outlined"
-          sx={{ borderRadius: 2, p: 0, overflow: "hidden" }}
+          sx={{ display: "block", borderRadius: 2, px: 2, overflow: "hidden" }}
         >
           <Box
             className="notice-scroll"

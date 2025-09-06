@@ -1,6 +1,6 @@
 // CreateCommunityModal.tsx
-'use client';
-import React from 'react';
+"use client";
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,9 +13,9 @@ import {
   IconButton,
   CircularProgress,
   Divider,
-} from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
-import ImageUpload from '@/components/ImageUpload/ImageUpload';
+} from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import ImageUpload from "@/components/ImageUpload/ImageUpload";
 
 interface NewCommunityForm {
   name: string;
@@ -44,27 +44,27 @@ export default function CreateCommunityModal({
   onChange,
 }: CreateCommunityModalProps) {
   const handleIconChange = (file: File | null, preview: string | null) => {
-    onChange(prev => ({
+    onChange((prev) => ({
       ...prev,
       iconFile: file,
-      iconPreview: preview
+      iconPreview: preview,
     }));
   };
 
   const handleCoverChange = (file: File | null, preview: string | null) => {
-    onChange(prev => ({
+    onChange((prev) => ({
       ...prev,
       coverFile: file,
-      coverPreview: preview
+      coverPreview: preview,
     }));
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(prev => ({ ...prev, name: e.target.value }));
+    onChange((prev) => ({ ...prev, name: e.target.value }));
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(prev => ({ ...prev, description: e.target.value }));
+    onChange((prev) => ({ ...prev, description: e.target.value }));
   };
 
   return (
@@ -76,8 +76,8 @@ export default function CreateCommunityModal({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          maxHeight: '90vh',
-        }
+          maxHeight: "90vh",
+        },
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>
@@ -89,7 +89,7 @@ export default function CreateCommunityModal({
             onClick={onClose}
             disabled={isSubmitting}
             size="small"
-            sx={{ color: 'grey.500' }}
+            sx={{ color: "grey.500" }}
           >
             <CloseIcon />
           </IconButton>
@@ -100,8 +100,7 @@ export default function CreateCommunityModal({
 
       <form onSubmit={onSubmit}>
         <DialogContent sx={{ pt: 3 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* アイコン画像 */}
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
@@ -123,7 +122,7 @@ export default function CreateCommunityModal({
               label="名称"
               value={newCommunity.name}
               onChange={handleNameChange}
-              placeholder="例：BBQ"
+              placeholder="Stray Kids好き集まれ！"
               required
               fullWidth
               variant="outlined"
@@ -131,7 +130,7 @@ export default function CreateCommunityModal({
                 shrink: true,
               }}
               sx={{
-                '& .MuiOutlinedInput-root': {
+                "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
                 },
               }}
@@ -151,7 +150,7 @@ export default function CreateCommunityModal({
                 shrink: true,
               }}
               sx={{
-                '& .MuiOutlinedInput-root': {
+                "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
                 },
               }}
@@ -168,7 +167,7 @@ export default function CreateCommunityModal({
             variant="outlined"
             sx={{
               borderRadius: 2,
-              textTransform: 'none',
+              textTransform: "none",
               minWidth: 100,
             }}
           >
@@ -178,14 +177,18 @@ export default function CreateCommunityModal({
             type="submit"
             disabled={isSubmitting || !newCommunity.name.trim()}
             variant="contained"
-            startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : null}
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : null
+            }
             sx={{
               borderRadius: 2,
-              textTransform: 'none',
+              textTransform: "none",
               minWidth: 100,
             }}
           >
-            {isSubmitting ? '作成中…' : '作成する'}
+            {isSubmitting ? "作成中…" : "作成する"}
           </Button>
         </DialogActions>
       </form>
