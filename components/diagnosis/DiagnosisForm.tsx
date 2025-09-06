@@ -110,7 +110,7 @@ export default function DiagnosisForm({ userName, userId, onComplete, onBack }: 
     },
     {
       id: 10,
-      text: "上司からのLINEに既読無視されたら？",
+      text: "上司とのLINEで既読無視されたら？",
       options: [
         { text: "ずっと気になる", value: 1 as const },
         { text: "少し気になるけど、すぐ切り替え", value: 2 as const },
