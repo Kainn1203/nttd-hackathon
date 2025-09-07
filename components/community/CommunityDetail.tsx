@@ -21,7 +21,11 @@ type Props = {
   ownerName?: string;
 };
 
-export default function CommunityDetail({ community, imageUrl, ownerName }: Props) {
+export default function CommunityDetail({
+  community,
+  imageUrl,
+  ownerName,
+}: Props) {
   const c = community;
 
   // 日付をフォーマット（時間を除いて日付のみ表示）
@@ -31,7 +35,7 @@ export default function CommunityDetail({ community, imageUrl, ownerName }: Prop
     return date.toLocaleDateString("ja-JP", {
       year: "numeric",
       month: "2-digit",
-      day: "2-digit"
+      day: "2-digit",
     });
   };
 
@@ -39,8 +43,13 @@ export default function CommunityDetail({ community, imageUrl, ownerName }: Prop
     <Container maxWidth="md" sx={{ py: 3 }}>
       <Card
         variant="outlined"
-        sx={{ borderRadius: 3, border: "1px solid #bfdbfe", background: "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)", boxShadow: 2 }}
-        className="dark:invert"
+        sx={{
+          borderRadius: 3,
+          border: "1px solid #bfdbfe",
+          background:
+            "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
+          boxShadow: 2,
+        }}
       >
         <CardHeader
           title={
@@ -81,7 +90,6 @@ export default function CommunityDetail({ community, imageUrl, ownerName }: Prop
                       fill
                       sizes="(max-width: 600px) 100vw, 360px"
                       style={{ objectFit: "contain" }}
-                      className="dark:invert"
                       // unoptimized を使うなら下を残す。不要なら削除可
                       // unoptimized
                     />

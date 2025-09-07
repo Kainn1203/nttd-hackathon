@@ -112,28 +112,28 @@ const getCommunity = async (supabase: SupabaseClient, communityId: number): Prom
 
 // ユーザー認証関数
 const authenticateUser = async (supabase: SupabaseClient): Promise<OperationResult<UserData>> => {
-  const { data: user, error: userError } = await supabase.auth.getUser();
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
-  if (userError) {
-    console.error("User auth error:", userError);
+  if (sessionError) {
+    console.error("Session error:", sessionError);
     return {
       success: false,
       error: CONSTANTS.ERROR_MESSAGES.AUTHENTICATION_FAILED,
-      details: userError.message,
+      details: sessionError.message,
       status: 401
     };
   }
 
-  if (!user.user) {
+  if (!session?.user) {
     return {
       success: false,
       error: CONSTANTS.ERROR_MESSAGES.FORBIDDEN,
-      details: "No authenticated user found",
+      details: "No authenticated session found",
       status: 403
     };
   }
 
-  return { success: true, data: user };
+  return { success: true, data: { user: session.user } };
 };
 
 // 権限チェック関数（getMe()と同じ方法）

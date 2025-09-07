@@ -20,7 +20,6 @@ type MemberView = { id: number; name: string; imageUrl?: string };
 export default function MembersSidebar({ members }: { members: MemberView[] }) {
   return (
     <Paper
-      className="dark:invert"
       variant="outlined"
       sx={{
         p: 2,

@@ -152,16 +152,12 @@ const ChannelCreationForm: React.FC<{
   );
 
   return (
-    <Stack spacing={3} alignItems="center" sx={{ width: '100%' }}>
+    <Stack spacing={3} alignItems="center" sx={{ width: "100%" }}>
       <Typography variant="h6" fontWeight={700}>
         {CONSTANTS.TITLES.CHANNEL_CREATION}
       </Typography>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ width: "80%" }}
-      >
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: "80%" }}>
         <Stack spacing={3}>
           <TextField
             label={CONSTANTS.MESSAGES.CHANNEL_NAME_LABEL}
@@ -197,12 +193,12 @@ const ChannelCreationForm: React.FC<{
                 <SiSlack size={18} />
               )
             }
-            sx={{ 
-              textTransform: "none", 
+            sx={{
+              textTransform: "none",
               borderRadius: 2,
               py: 1.5,
               px: 4,
-              fontSize: '1rem'
+              fontSize: "1rem",
             }}
             size="large"
           >
@@ -276,7 +272,6 @@ export default function SlackChannelSetup({
             bgcolor: "background.paper",
             p: 2,
           }}
-          className="dark:invert"
         >
           <CircularProgress />
         </Paper>
@@ -321,7 +316,6 @@ export default function SlackChannelSetup({
             bgcolor: "background.paper",
             p: 2,
           }}
-          className="dark:invert"
         >
           <ChannelCreationForm
             communityName={communityName}

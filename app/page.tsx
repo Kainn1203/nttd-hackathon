@@ -31,7 +31,24 @@ export const metadata = { title: "NTTデータ内定者向けコミュニティ"
 
 export default async function Home() {
   const me = await getMe();
-  if (!me) redirect("/login");
+  
+  // 認証チェックはミドルウェアで行われるため、
+  // ここに到達した時点でログイン済みのはず
+  // meがnullの場合は何かエラーがある
+  if (!me) {
+    console.error("User should be authenticated but getMe returned null");
+    // デバッグのため一時的にリダイレクトを無効化
+    return (
+      <main>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography>認証エラー: ユーザー情報を取得できません。</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            ブラウザのキャッシュをクリアして、再度ログインしてください。
+          </Typography>
+        </Container>
+      </main>
+    );
+  }
   // 画像URL（フルURL or パス対応）
   let avatarUrl: string | undefined = undefined;
   if (me?.imagePath) {
@@ -225,6 +242,7 @@ export default async function Home() {
                           variant="caption"
                           color="text.secondary"
                           sx={{ minWidth: { xs: 120, sm: 140 } }}
+                          suppressHydrationWarning
                         >
                           {a.created_at
                             ? new Date(a.created_at).toLocaleString("ja-JP")
@@ -292,6 +310,7 @@ export default async function Home() {
                             color="warning"
                             variant="outlined"
                             sx={{ ml: 1 }}
+                            suppressHydrationWarning
                           />
                         ) : null}
                       </Box>
@@ -317,6 +336,7 @@ export default async function Home() {
                         variant="caption"
                         color="text.secondary"
                         sx={{ minWidth: { xs: 120, sm: 140 } }}
+                        suppressHydrationWarning
                       >
                         {a.created_at
                           ? new Date(a.created_at).toLocaleString("ja-JP")
