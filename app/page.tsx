@@ -302,17 +302,16 @@ export default async function Home() {
                         />
                         {/* 締切タグ（deadline） */}
                         {eventsById[a.event_id]?.deadline ? (
-                          <Box suppressHydrationWarning>
-                            <Chip
-                              label={`締切: ${new Date(
-                                eventsById[a.event_id]!.deadline as string
-                              ).toLocaleDateString("ja-JP")}`}
-                              size="small"
-                              color="warning"
-                              variant="outlined"
-                              sx={{ ml: 1 }}
-                            />
-                          </Box>
+                          <Chip
+                            label={`締切: ${new Date(
+                              eventsById[a.event_id]!.deadline as string
+                            ).toLocaleDateString("ja-JP")}`}
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                            suppressHydrationWarning
+                          />
                         ) : null}
                       </Box>
                     </Link>

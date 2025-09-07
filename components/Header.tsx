@@ -30,13 +30,18 @@ const nav = [
   { href: "/members", label: "内定者一覧", icon: <GroupsIcon /> },
   { href: "/communities", label: "コミュニティ", icon: <ForumIcon /> },
   { href: "/events", label: "イベント", icon: <EventIcon /> },
-  { href: "/diagnosis", label: "社畜度診断", icon: <PsychologyIcon /> },
   { href: "/myPage", label: "マイページ", icon: <PersonIcon /> },
+  { href: "/diagnosis", label: "社畜度診断", icon: <PsychologyIcon /> },
 ];
 
 export default function Header() {
   const [open, setOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname() ?? "/";
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <AppBar
@@ -79,8 +84,8 @@ export default function Header() {
               }}
             >
               {nav.map((n) => {
-                const isActive =
-                  pathname === n.href || pathname.startsWith(`${n.href}/`);
+                const isActive = mounted && (pathname === n.href || pathname.startsWith(`${n.href}/`));
+                const isDiagnosis = n.href === "/diagnosis";
                 return (
                   <Button
                     key={n.href}
@@ -93,13 +98,14 @@ export default function Header() {
                           display: "inline-flex",
                           transition: "transform .2s ease",
                           transformOrigin: "center",
+                          color: isDiagnosis ? "white" : undefined,
                         }}
                       >
                         {n.icon}
                       </Box>
                     }
                     size="small"
-                    color="primary"
+                    color={isDiagnosis ? "inherit" : "primary"}
                     fullWidth
                     sx={{
                       width: "100%",
@@ -109,11 +115,24 @@ export default function Header() {
                       borderRadius: 1,
                       whiteSpace: "nowrap",
                       px: 2,
-                      backgroundColor: isActive
+                      background: isDiagnosis
+                        ? "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
+                        : isActive
+                        ? undefined
+                        : "transparent",
+                      backgroundColor: isDiagnosis
+                        ? undefined
+                        : isActive
                         ? "action.selected"
                         : "transparent",
+                      color: isDiagnosis ? "white" : undefined,
                       "&:hover": {
-                        backgroundColor: "action.hover",
+                        backgroundColor: isDiagnosis
+                          ? undefined
+                          : "action.hover",
+                        background: isDiagnosis
+                          ? "linear-gradient(135deg, #7C3AED 0%, #0891B2 100%)"
+                          : undefined,
                       },
                       "&:hover .nav-icon": { transform: "scale(1.12)" },
                     }}
@@ -149,12 +168,34 @@ export default function Header() {
           onClick={() => setOpen(false)}
         >
           <List>
-            {nav.map((n) => (
-              <ListItemButton key={n.href} component={Link} href={n.href}>
-                <ListItemIcon>{n.icon}</ListItemIcon>
-                <ListItemText primary={n.label} />
-              </ListItemButton>
-            ))}
+            {nav.map((n) => {
+              const isDiagnosis = n.href === "/diagnosis";
+              return (
+                <ListItemButton
+                  key={n.href}
+                  component={Link}
+                  href={n.href}
+                  sx={{
+                    background: isDiagnosis
+                      ? "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
+                      : undefined,
+                    color: isDiagnosis ? "white" : undefined,
+                    "&:hover": {
+                      background: isDiagnosis
+                        ? "linear-gradient(135deg, #7C3AED 0%, #0891B2 100%)"
+                        : undefined,
+                    },
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{ color: isDiagnosis ? "white" : undefined }}
+                  >
+                    {n.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={n.label} />
+                </ListItemButton>
+              );
+            })}
           </List>
         </Box>
       </Drawer>

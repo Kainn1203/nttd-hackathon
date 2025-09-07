@@ -23,8 +23,8 @@ async function joinSlackChannel(communityId: number) {
     }
 
     // 2) ユーザーのSlack認証トークンを取得
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       console.log("ユーザーが認証されていません");
       return;
     }

@@ -53,15 +53,15 @@ export async function GET(req: Request) {
     // (5) 現在のユーザーを取得
     const supabase = await createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (user) {
+    if (session?.user) {
       // (6) データベースにslack_user_idを保存
       await supabase
         .from("user")
         .update({ slack_user_id: userInfo.user.id })
-        .eq("id", user.id);
+        .eq("auth_id", session.user.id);
     }
   }
 

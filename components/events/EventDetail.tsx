@@ -18,7 +18,7 @@ import {
   Announcement,
 } from "@mui/icons-material";
 import type { EventWithCandidates } from "@/types/event";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnnouncementModal from "./AnnouncementModal";
 
 interface EventDetailProps {
@@ -33,6 +33,11 @@ export default function EventDetail({
   isOwner = false,
 }: EventDetailProps) {
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
+  const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
+  
+  useEffect(() => {
+    setIsDeadlinePassed(new Date(event.deadline) < new Date());
+  }, [event.deadline]);
 
   const handleAnnouncementCreated = () => {
     // 親コンポーネントに通知するためのコールバック
@@ -59,13 +64,13 @@ export default function EventDetail({
 
   const getStatusColor = () => {
     if (event.is_finalized) return "success";
-    if (new Date(event.deadline) < new Date()) return "error";
+    if (isDeadlinePassed) return "error";
     return "default";
   };
 
   const getStatusText = () => {
     if (event.is_finalized) return "確定済み";
-    if (new Date(event.deadline) < new Date()) return "締切済み";
+    if (isDeadlinePassed) return "締切済み";
     return "募集中";
   };
 
