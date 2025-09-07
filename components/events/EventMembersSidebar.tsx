@@ -24,7 +24,6 @@ export default function EventMembersSidebar({
 }) {
   return (
     <Paper
-      className="dark:invert"
       variant="outlined"
       sx={{
         p: 2,
@@ -33,7 +32,7 @@ export default function EventMembersSidebar({
         flexDirection: "column",
         maxHeight: { xs: "none", md: "600px" },
         background:
-          'linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)',
+          "linear-gradient(180deg, rgba(33,150,243,0.06) 0%, rgba(33,150,243,0.02) 100%)",
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>

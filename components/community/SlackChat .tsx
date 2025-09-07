@@ -119,7 +119,6 @@ export default function SlackChat({ channelId }: SlackChatProps) {
               disabled={loading}
               size="medium"
               color="primary"
-              className="dark:invert"
             >
               <RefreshIcon fontSize="medium" />
             </IconButton>
@@ -132,7 +131,6 @@ export default function SlackChat({ channelId }: SlackChatProps) {
             startIcon={<SiSlack size={18} />}
             onClick={() => window.open(webUrl, "_blank", "noopener,noreferrer")}
             sx={{ textTransform: "none" }}
-            className="dark:invert"
           >
             Slackで開く
           </Button>
@@ -140,7 +138,6 @@ export default function SlackChat({ channelId }: SlackChatProps) {
       </Stack>
 
       <Paper
-        className="dark:invert"
         elevation={0}
         variant="outlined"
         ref={scrollerRef}
@@ -165,7 +162,6 @@ export default function SlackChat({ channelId }: SlackChatProps) {
                 direction="row"
                 justifyContent={isMe ? "flex-end" : "flex-start"}
                 spacing={1}
-                className="dark:invert"
               >
                 {!isMe && !isSystem && (
                   <Avatar
@@ -247,13 +243,7 @@ export default function SlackChat({ channelId }: SlackChatProps) {
       </Paper>
 
       {/* 入力欄 */}
-      <Stack
-        direction="row"
-        spacing={1}
-        marginTop={2}
-        marginBottom={2}
-        className="dark:invert"
-      >
+      <Stack direction="row" spacing={1} marginTop={2} marginBottom={2}>
         <TextField
           id={channelId}
           value={text}

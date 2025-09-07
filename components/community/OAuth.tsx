@@ -31,12 +31,7 @@ export default function OAuth() {
         <Box flex={1} />
         <Tooltip title="再読込">
           <span>
-            <IconButton
-              disabled
-              size="medium"
-              color="primary"
-              className="dark:invert"
-            >
+            <IconButton disabled size="medium" color="primary">
               <RefreshIcon fontSize="medium" />
             </IconButton>
           </span>
@@ -46,7 +41,6 @@ export default function OAuth() {
           variant="outlined"
           size="small"
           startIcon={<SiSlack size={18} />}
-          className="dark:invert"
           disabled
         >
           Slackで開く
@@ -63,7 +57,6 @@ export default function OAuth() {
           bgcolor: "background.paper",
           p: 2,
         }}
-        className="dark:invert"
       >
         <Stack spacing={2} alignItems="center">
           <Typography variant="h6" fontWeight={700}>

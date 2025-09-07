@@ -56,7 +56,7 @@ export default function LoginPage() {
         px: 2,
       }}
     >
-      <Container maxWidth="sm" disableGutters className="dark:invert">
+      <Container maxWidth="sm" disableGutters>
         <Paper
           elevation={10}
           sx={{

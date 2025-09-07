@@ -10,7 +10,7 @@ export default async function DiagnosisPage() {
   
   // 未ログインの場合はログインページにリダイレクト
   if (!me) {
-    redirect('/auth/login')
+    redirect('/login')
   }
 
   // クライアントコンポーネントにユーザー情報を渡す
